@@ -1,0 +1,19 @@
+debug: DEBUG
+
+server:
+  port: SERVER_PORT
+
+<% if (database) {%>
+db:
+  uri: DB_URI
+  host: DB_HOST
+  port: DB_PORT
+  name: DB_NAME
+  login: DB_LOGIN
+  password: DB_PASSWD<%}%>
+
+logging:
+  file:
+    loglevel: FILE_LOG_LEVEL
+  console:
+    loglevel: CONSOLE_LOG_LEVEL

@@ -1,0 +1,14 @@
+server:
+  port: 8000
+
+<% if (database) {%>
+db:
+  host: localhost
+  port: 27017
+  name: <%=database%><%}%>
+
+logging:
+  file:
+    loglevel: info
+  console:
+    loglevel: debug

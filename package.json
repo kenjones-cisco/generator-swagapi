@@ -1,0 +1,52 @@
+{
+  "name": "generator-swagapi",
+  "description": "Yeoman generator for swagger-based express application.",
+  "version": "0.1.0",
+  "author": "Kenny Jones <kenjones@cisco.com>",
+  "keywords": [
+    "yeoman",
+    "generator",
+    "yo",
+    "swagger",
+    "swaggerize",
+    "express",
+    "expressjs",
+    "node",
+    "node.js",
+    "rest",
+    "restful",
+    "service",
+    "api"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kenjones-cisco/generator-swagapi"
+  },
+  "bugs": "http://github.com/kenjones-cisco/generator-swagapi/issues",
+  "dependencies": {
+    "debuglog": "^1.0.1",
+    "enjoi": "^1.0.0",
+    "gulp-beautify": "^2.0.0",
+    "gulp-if": "^2.0.0",
+    "js-yaml": "^3.2.6",
+    "lodash": "^3.10.0",
+    "mkdirp": "^0.5.1",
+    "pluralize": "^1.2.1",
+    "swaggerize-routes": "^1.0.0",
+    "swagger-schema-official": "^2.0.0-",
+    "underscore.string": "^3.1.1",
+    "yeoman-generator": "^0.20.1"
+  },
+  "devDependencies": {
+    "yeoman-assert": "^2.1.1",
+    "gulp": "^3.9.0",
+    "gulp-istanbul": "^0.10.3",
+    "gulp-eslint": "^1.1.1",
+    "gulp-jasmine": "^2.1.0"
+  },
+  "scripts": {
+    "test": "gulp test",
+    "cover": "gulp cover",
+    "lint": "gulp lint"
+  }
+}
