@@ -48,5 +48,6 @@
     "test": "gulp test",
     "cover": "gulp cover",
     "lint": "gulp lint"
-  }
+  },
+  "license": "Apache-2.0"
 }
