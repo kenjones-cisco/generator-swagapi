@@ -121,6 +121,11 @@ module.exports = yeoman.Base.extend({
                 _.forEach(api.definitions, function(modelSchema, key) {
                     var options = {};
 
+                    if (!modelSchema.properties) {
+                        debug('model has no properties: %s', key);
+                        return;
+                    }
+
                     Object.keys(modelSchema.properties).forEach(function(prop) {
                         var defaultValue;
 

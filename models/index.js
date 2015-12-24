@@ -38,6 +38,10 @@ module.exports = yeoman.Base.extend({
             }
 
             _.forEach(this.api.definitions, function (model, modelName) {
+                if (!model.properties) {
+                    debug('model has no properties: %s', modelName);
+                    return;
+                }
                 if (model['x-parent']) {
                     debug('parent: %s', model['x-parent']);
                     // if we have a parent then let our parent handle our setup.
