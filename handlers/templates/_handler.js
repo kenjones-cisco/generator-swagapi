@@ -100,6 +100,8 @@ module.exports = {
     <%=method.method%>: function <%=method.name%>(req, res, next) {
     <% if (dbmodels === null || dbmodels.length === 0) {%>
         res.sendStatus(501);
+        return next();
+    }<%if (i < methods.length - 1) {%>, <%}%>
     <%
         return;
     }
