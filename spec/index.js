@@ -12,7 +12,7 @@ var jsYaml = require('js-yaml');
 var mkdirp = require('mkdirp');
 var yeoman = require('yeoman-generator');
 
-var debug = require('debuglog')('generator-swagapi');
+var debug = require('util').debuglog('generator-swagapi');
 
 
 function fileExists(file) {

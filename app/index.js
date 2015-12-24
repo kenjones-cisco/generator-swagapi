@@ -6,7 +6,7 @@ var _s = require('underscore.string');
 var gulpif = require('gulp-if');
 var beautify = require('gulp-beautify');
 
-var debug = require('debuglog')('generator-swagapi');
+var debug = require('util').debuglog('generator-swagapi');
 
 
 module.exports = yeoman.Base.extend({

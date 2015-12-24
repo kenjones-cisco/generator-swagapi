@@ -5,7 +5,7 @@ var yeoman = require('yeoman-generator');
 var _ = require('lodash');
 var mkdirp = require('mkdirp');
 
-var debug = require('debuglog')('generator-swagapi');
+var debug = require('util').debuglog('generator-swagapi');
 
 
 module.exports = yeoman.Base.extend({

@@ -24,7 +24,6 @@
   },
   "bugs": "http://github.com/kenjones-cisco/generator-swagapi/issues",
   "dependencies": {
-    "debuglog": "^1.0.1",
     "enjoi": "^1.0.0",
     "gulp-beautify": "^2.0.0",
     "gulp-if": "^2.0.0",

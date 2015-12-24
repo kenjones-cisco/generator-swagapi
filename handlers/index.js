@@ -8,7 +8,7 @@ var mkdirp = require('mkdirp');
 var builderUtils = require('swaggerize-routes/lib/utils');
 var pluralize = require('pluralize');
 
-var debug = require('debuglog')('generator-swagapi');
+var debug = require('util').debuglog('generator-swagapi');
 
 
 module.exports = yeoman.Base.extend({
