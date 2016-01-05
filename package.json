@@ -48,7 +48,8 @@
   "scripts": {
     "test": "gulp test",
     "cover": "gulp cover",
-    "lint": "gulp lint"
+    "lint": "gulp lint",
+    "coveralls": "gulp coveralls"
   },
   "license": "Apache-2.0"
 }
