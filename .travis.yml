@@ -3,9 +3,7 @@ node_js:
   - "4.1"
 
 script:
-  - mkdir -p $(pwd)/coverage
   - npm run cover
 
 after_script:
-  - ls -la $(pwd)/coverage/
   - npm run coveralls

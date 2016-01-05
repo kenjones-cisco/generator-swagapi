@@ -29,7 +29,7 @@ gulp.task('cover', ['lint', 'pre-test'], function () {
         .pipe(jasmine())
         // Creating the reports after tests ran
         .pipe(istanbul.writeReports({
-            reporters: ['html']
+            reporters: ['html', 'lcov']
         }));
 });
 
@@ -41,6 +41,6 @@ gulp.task('lint', function () {
 });
 
 gulp.task('coveralls', function () {
-    return gulp.src('./coverage/lcov.info')
+    return gulp.src('coverage/lcov.info')
         .pipe(coveralls());
 });
