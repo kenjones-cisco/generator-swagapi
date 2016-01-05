@@ -1,6 +1,8 @@
 generator-swagapi
 ====================
 
+[![Build Status](https://travis-ci.org/kenjones-cisco/generator-swagapi.svg?branch=master)](https://travis-ci.org/kenjones-cisco/generator-swagapi)
+
 Yeoman generator for swagger-based express application.
 
 See also:

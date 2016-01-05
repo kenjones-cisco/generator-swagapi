@@ -42,7 +42,8 @@
     "gulp": "^3.9.0",
     "gulp-istanbul": "^0.10.3",
     "gulp-eslint": "^1.1.1",
-    "gulp-jasmine": "^2.1.0"
+    "gulp-jasmine": "^2.1.0",
+    "gulp-coveralls": "^0.1.4"
   },
   "scripts": {
     "test": "gulp test",
