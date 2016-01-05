@@ -5,6 +5,7 @@ var yeoman = require('yeoman-generator');
 var _s = require('underscore.string');
 var gulpif = require('gulp-if');
 var beautify = require('gulp-beautify');
+var upath = require('upath');
 
 var debug = require('util').debuglog('generator-swagapi');
 
@@ -63,7 +64,7 @@ module.exports = yeoman.Base.extend({
             debug('oldRoot: %s appName: %s', oldRoot, this.name);
             this.appname = this.name;
             if (path.basename(oldRoot) !== this.appname) {
-                this.destinationRoot(path.join(oldRoot, this.appname));
+                this.destinationRoot(upath.joinSafe(oldRoot, this.appname));
                 debug('updated destinationRoot to %s', this.destinationRoot());
             }
             this.appRoot = this.destinationRoot();
@@ -128,19 +129,21 @@ module.exports = yeoman.Base.extend({
         app: function () {
 
             if (this.options['dry-run']) {
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, '.eslintrc'));
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, '.eslintignore'));
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, '.gitignore'));
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, '.npmignore'));
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, 'package.json'));
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, 'README.md'));
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, 'gulpfile.js'));
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, 'config', 'logger.js'));
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, 'config', 'errors.js'));
+                this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, '.eslintrc'));
+                this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, '.eslintignore'));
+                this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, '.gitignore'));
+                this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, '.npmignore'));
+                this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, 'package.json'));
+                this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, 'README.md'));
+                this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, 'gulpfile.js'));
                 this.log.ok('(DRY-RUN) %s written',
-                    path.join(this.appRoot, 'config', 'default.yml'));
+                    upath.joinSafe(this.appRoot, 'config', 'logger.js'));
                 this.log.ok('(DRY-RUN) %s written',
-                    path.join(this.appRoot, 'config', 'custom-environment-variables.yml'));
+                    upath.joinSafe(this.appRoot, 'config', 'errors.js'));
+                this.log.ok('(DRY-RUN) %s written',
+                    upath.joinSafe(this.appRoot, 'config', 'default.yml'));
+                this.log.ok('(DRY-RUN) %s written',
+                    upath.joinSafe(this.appRoot, 'config', 'custom-environment-variables.yml'));
                 return;
             }
 
@@ -156,13 +159,13 @@ module.exports = yeoman.Base.extend({
             });
 
             this.copy('_gulpfile.js', 'gulpfile.js');
-            this.copy('_logger.js', path.join(this.appRoot, 'config', 'logger.js'));
-            this.copy('_errors.js', path.join(this.appRoot, 'config', 'errors.js'));
-            this.template('default.yml', path.join(this.appRoot, 'config', 'default.yml'), {
+            this.copy('_logger.js', upath.joinSafe(this.appRoot, 'config', 'logger.js'));
+            this.copy('_errors.js', upath.joinSafe(this.appRoot, 'config', 'errors.js'));
+            this.template('default.yml', upath.joinSafe(this.appRoot, 'config', 'default.yml'), {
                 database: this.config.get('database')
             });
             this.template('custom-environment-variables.yml',
-                path.join(this.appRoot, 'config', 'custom-environment-variables.yml'), {
+                upath.joinSafe(this.appRoot, 'config', 'custom-environment-variables.yml'), {
                     database: this.config.get('database')
                 });
 
@@ -175,12 +178,13 @@ module.exports = yeoman.Base.extend({
             }
 
             if (this.options['dry-run']) {
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, 'config', 'db.js'));
+                this.log.ok('(DRY-RUN) %s written',
+                    upath.joinSafe(this.appRoot, 'config', 'db.js'));
                 return;
             }
 
             debug('generating database configuration files');
-            this.template('_config_db.js', path.join('config', 'db.js'), {
+            this.template('_config_db.js', upath.joinSafe('config', 'db.js'), {
                 database: this.config.get('database')
             });
         },

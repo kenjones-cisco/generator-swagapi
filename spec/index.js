@@ -10,6 +10,7 @@ var apischema = require('swagger-schema-official/schema');
 var enjoi = require('enjoi');
 var jsYaml = require('js-yaml');
 var mkdirp = require('mkdirp');
+var upath = require('upath');
 var yeoman = require('yeoman-generator');
 
 var debug = require('util').debuglog('generator-swagapi');
@@ -125,7 +126,7 @@ module.exports = yeoman.Base.extend({
 
             apiDestPath = this._prepareDest();
             apiSrc = path.resolve(apiSrcPath);
-            apiPath = path.join(apiDestPath, path.basename(apiSrc));
+            apiPath = upath.joinSafe(apiDestPath, path.basename(apiSrc));
 
             this.copy(apiSrc, apiPath);
             this.config.set('apiPath', apiPath);
@@ -147,7 +148,7 @@ module.exports = yeoman.Base.extend({
 
             apiDestPath = this._prepareDest();
             apiSrc = url.parse(apiSrcPath).pathname;
-            apiPath = path.join(apiDestPath, path.basename(apiSrc));
+            apiPath = upath.joinSafe(apiDestPath, path.basename(apiSrc));
 
             self.fetch(apiSrcPath, apiDestPath, function (err) {
                 if (err) {
@@ -177,12 +178,13 @@ module.exports = yeoman.Base.extend({
         server: function () {
 
             if (this.options['dry-run']) {
-                this.log.ok('(DRY-RUN) %s written', path.join(this.appRoot, 'server.js'));
+                this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, 'server.js'));
                 return;
             }
 
             this.template('_server.js', 'server.js', {
-                apiPath: path.relative(this.appRoot, this.config.get('apiPath')),
+                apiPath: upath.normalizeSafe(
+                    path.relative(this.appRoot, this.config.get('apiPath'))),
                 database: this.config.get('database')
             });
         },
@@ -211,7 +213,7 @@ module.exports = yeoman.Base.extend({
     _prepareDest: function () {
         var apiDestPath = this.destinationPath('config');
         if (this.options['dry-run']) {
-            apiDestPath = path.join(os.tmpdir(), 'config');
+            apiDestPath = upath.joinSafe(os.tmpdir(), 'config');
             this.log('(DRY-RUN) using temp location %s', apiDestPath);
         }
         mkdirp.sync(apiDestPath);

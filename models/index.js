@@ -1,9 +1,9 @@
 'use strict';
 
-var path = require('path');
 var yeoman = require('yeoman-generator');
 var _ = require('lodash');
 var mkdirp = require('mkdirp');
+var upath = require('upath');
 
 var debug = require('util').debuglog('generator-swagapi');
 
@@ -23,7 +23,7 @@ module.exports = yeoman.Base.extend({
         models: function() {
             var self = this;
             var models = {};
-            var basePath = path.join(self.appRoot, 'models');
+            var basePath = upath.joinSafe(self.appRoot, 'models');
 
             if (!self.options['dry-run']) {
                 mkdirp.sync(basePath);
@@ -31,7 +31,8 @@ module.exports = yeoman.Base.extend({
 
             if (self.config.get('database')) {
                 if (!self.options['dry-run']) {
-                    self.copy('_models_index.js', path.join(self.appRoot, 'models', 'index.js'));
+                    self.copy('_models_index.js',
+                        upath.joinSafe(self.appRoot, 'models', 'index.js'));
                 } else {
                     self.log.ok('(DRY-RUN) (db) models index generated');
                 }
@@ -63,7 +64,8 @@ module.exports = yeoman.Base.extend({
 
             _.forEach(models, function (model, modelName) {
 
-                var file = path.join(basePath, modelName.toLowerCase() + '.js');
+                var file = upath.addExt(
+                    upath.joinSafe(basePath, modelName.toLowerCase()), '.js');
 
                 // provides access to lodash within the template
                 model._ = _;

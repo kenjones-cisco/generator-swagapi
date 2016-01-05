@@ -31,9 +31,10 @@
     "lodash": "^3.10.0",
     "mkdirp": "^0.5.1",
     "pluralize": "^1.2.1",
-    "swaggerize-routes": "^1.0.0",
+    "swagger-methods": "^1.0.0",
     "swagger-schema-official": "^2.0.0-",
     "underscore.string": "^3.1.1",
+    "upath": "^0.1.6",
     "yeoman-generator": "^0.20.1"
   },
   "devDependencies": {

@@ -5,10 +5,31 @@ var yeoman = require('yeoman-generator');
 var _ = require('lodash');
 var _s = require('underscore.string');
 var mkdirp = require('mkdirp');
-var builderUtils = require('swaggerize-routes/lib/utils');
+var methods = require('swagger-methods');
 var pluralize = require('pluralize');
+var upath = require('upath');
 
 var debug = require('util').debuglog('generator-swagapi');
+
+function prefix(str, pre) {
+    str = str || '';
+    if (str.indexOf(pre) === 0) {
+        return str;
+    }
+
+    str = pre + str;
+    return str;
+}
+
+function unprefix(str, pre) {
+    str = str || '';
+    if (str.indexOf(pre) === 0) {
+        str = str.substr(pre.length);
+        return str;
+    }
+
+    return str;
+}
 
 
 module.exports = yeoman.Base.extend({
@@ -23,17 +44,17 @@ module.exports = yeoman.Base.extend({
     },
 
     writing: {
-        handlers: function() {
+        handlers: function () {
             var routes, self;
 
             self = this;
             routes = {};
 
             if (!self.options['dry-run']) {
-                mkdirp.sync(path.join(self.appRoot, 'handlers'));
+                mkdirp.sync(upath.joinSafe(self.appRoot, 'handlers'));
             }
 
-            _.forEach(this.api.paths, function(def, apipath) {
+            _.forEach(this.api.paths, function (def, apipath) {
                 var pathnames, route;
 
                 route = {
@@ -45,7 +66,7 @@ module.exports = yeoman.Base.extend({
 
                 pathnames = [];
 
-                apipath.split('/').forEach(function(element) {
+                apipath.split('/').forEach(function (element) {
                     if (element) {
                         pathnames.push(element);
                     }
@@ -56,7 +77,7 @@ module.exports = yeoman.Base.extend({
                 // else default to the route path.
                 route.handler = def['x-handler'] || route.pathname;
 
-                _.forEach(builderUtils.verbs, function(verb) {
+                _.forEach(methods, function (verb) {
                     var operation = def[verb];
 
                     if (!operation) {
@@ -82,43 +103,43 @@ module.exports = yeoman.Base.extend({
                 routes[route.pathname] = route;
             });
 
-            Object.keys(routes).forEach(function(routePath) {
+            Object.keys(routes).forEach(function (routePath) {
                 var handlername, route, file;
 
                 route = routes[routePath];
                 handlername = route.handler;
-                handlername = builderUtils.prefix(handlername, 'handlers/');
-                handlername = builderUtils.suffix(handlername, '.js');
+                handlername = prefix(handlername, 'handlers/');
+                handlername = upath.addExt(handlername, '.js');
 
-                file = path.join(self.appRoot, handlername);
+                file = upath.joinSafe(self.appRoot, handlername);
 
                 // provides access to lodash within the template
                 route._ = _;
                 route.dbmodels = self._getDbModels(route);
                 if (!self.options['dry-run']) {
-                    self.template('_handler' + '.js', file, route);
+                    self.template('_handler.js', file, route);
                 } else {
                     self.log.ok('(DRY-RUN) handler %s generated', file);
                 }
             });
         },
 
-        tests: function() {
+        tests: function () {
             var self, api, models, resourcePath, modelsPath;
 
             if (!this.options['dry-run']) {
-                mkdirp.sync(path.join(this.appRoot, 'tests'));
+                mkdirp.sync(upath.joinSafe(this.appRoot, 'tests'));
             }
 
             self = this;
             api = this.api;
             models = {};
 
-            modelsPath = path.join(self.appRoot, 'models');
+            modelsPath = upath.joinSafe(self.appRoot, 'models');
 
             if (api.definitions && modelsPath) {
 
-                _.forEach(api.definitions, function(modelSchema, key) {
+                _.forEach(api.definitions, function (modelSchema, key) {
                     var options = {};
 
                     if (!modelSchema.properties) {
@@ -126,7 +147,7 @@ module.exports = yeoman.Base.extend({
                         return;
                     }
 
-                    Object.keys(modelSchema.properties).forEach(function(prop) {
+                    Object.keys(modelSchema.properties).forEach(function (prop) {
                         var defaultValue;
 
                         switch (modelSchema.properties[prop].type) {
@@ -156,19 +177,19 @@ module.exports = yeoman.Base.extend({
             }
             resourcePath = api.basePath;
 
-            _.forEach(api.paths, function(def, opath) {
+            _.forEach(api.paths, function (def, opath) {
                 var file, fileName, operations;
 
                 operations = [];
 
-                _.forEach(builderUtils.verbs, function(verb) {
+                _.forEach(methods, function (verb) {
                     var operation = {};
 
                     if (!def[verb]) {
                         return;
                     }
 
-                    _.forEach(def[verb], function(op, key) {
+                    _.forEach(def[verb], function (op, key) {
                         operation[key] = op;
                     });
 
@@ -181,10 +202,10 @@ module.exports = yeoman.Base.extend({
                 fileName = 'test' + opath.replace(/\//g, '_') + '.js';
                 if (def['x-handler']) {
                     fileName = def['x-handler'];
-                    fileName = 'test_' + builderUtils.unprefix(fileName, 'handlers/');
-                    fileName = builderUtils.suffix(fileName, '.js');
+                    fileName = 'test_' + unprefix(fileName, 'handlers/');
+                    fileName = upath.addExt(fileName, '.js');
                 }
-                file = path.join(self.appRoot, 'tests', fileName);
+                file = upath.joinSafe(self.appRoot, 'tests', fileName);
 
                 if (!self.options['dry-run']) {
                     debug('generating handler test %s', file);
@@ -205,23 +226,24 @@ module.exports = yeoman.Base.extend({
     _getDbModels: function getDbModels(route) {
         var self = this;
         var dbModels = [];
-        var relPath = path.join(self.appRoot, 'handlers');
+        var relPath = upath.joinSafe(self.appRoot, 'handlers');
         var single, dbFileName, className;
 
         if (!self.config.get('database')) {
             return null;
         }
 
-        route.path.split('/').forEach(function(element) {
+        route.path.split('/').forEach(function (element) {
             if (element) {
                 single = pluralize.singular(element);
                 debug('element: %s single: %s', element, single);
-                dbFileName = path.join(self.appRoot, 'models', single + '.js');
+                dbFileName = upath.addExt(upath.joinSafe(self.appRoot, 'models', single), '.js');
                 if (self.fs.exists(dbFileName)) {
                     className = _s.classify(single);
                     dbModels.push({
                         name: className,
-                        path: builderUtils.unsuffix(path.relative(relPath, dbFileName), '.js')
+                        path: upath.removeExt(
+                            upath.toUnix(path.relative(relPath, dbFileName)), '.js')
                     });
                 }
             }
