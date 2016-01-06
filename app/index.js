@@ -10,6 +10,14 @@ var upath = require('upath');
 var debug = require('util').debuglog('generator-swagapi');
 
 
+function loadApi(apiPath) {
+  var content = require('fs').readFileSync(apiPath);
+  if ( /\.ya?ml$/.test(apiPath) ) {
+    return require('js-yaml').safeLoad(content);
+  }
+  return JSON.parse(content);
+}
+
 module.exports = yeoman.Base.extend({
     initializing: {
         init: function () {
@@ -153,10 +161,10 @@ module.exports = yeoman.Base.extend({
             this.copy('gitignore', '.gitignore');
             this.copy('npmignore', '.npmignore');
 
-            this.template('_package.json', 'package.json', this.config.getAll());
-            this.template('_README.md', 'README.md', {
-                slugName: this.config.get('slugName')
-            });
+          this.template('_package.json', 'package.json', this.config.getAll());
+          this.config.set('api', loadApi(this.config.get('apiPath')));
+
+          this.template('_README.md', 'README.md', this.config.getAll());
 
             this.copy('_gulpfile.js', 'gulpfile.js');
             this.copy('_logger.js', upath.joinSafe(this.appRoot, 'config', 'logger.js'));
