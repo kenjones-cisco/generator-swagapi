@@ -95,7 +95,7 @@ module.exports = yeoman.Base.extend({
 
                 // provides access to lodash within the template
                 route._ = _;
-                route.dbmodels = self._getDbModels(route);
+                route.dbmodels = self._getDbModels(route, path.dirname(file));
                 if (!self.options['dry-run']) {
                     self.template('_handler.js', file, route);
                 } else {
@@ -203,10 +203,9 @@ module.exports = yeoman.Base.extend({
         }
     },
 
-    _getDbModels: function getDbModels(route) {
+    _getDbModels: function getDbModels(route, relPath) {
         var self = this;
         var dbModels = [];
-        var relPath = upath.joinSafe(self.appRoot, 'handlers');
         var single, dbFileName, className;
 
         if (!self.config.get('database')) {
