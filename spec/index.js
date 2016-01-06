@@ -1,74 +1,16 @@
 /*eslint no-unused-vars: [2, {"args": "after-used", "argsIgnorePattern": "^value$"}]*/
 'use strict';
 
-var fs = require('fs');
 var path = require('path');
 var os = require('os');
 var url = require('url');
-var _s = require('underscore.string');
 var apischema = require('swagger-schema-official/schema');
 var enjoi = require('enjoi');
-var jsYaml = require('js-yaml');
 var mkdirp = require('mkdirp');
 var upath = require('upath');
 var yeoman = require('yeoman-generator');
-
-var debug = require('util').debuglog('generator-swagapi');
-
-
-function fileExists(file) {
-    var exists = true;
-
-    try {
-        fs.statSync(file);
-    } catch (err) {
-        exists = false;
-    }
-    return exists;
-}
-
-function findFile(name, root, project) {
-    var location;
-    debug('name: %s root: %s project: %s', name, root, project);
-
-    if (!name) {
-        return name;
-    }
-
-    location = path.resolve(root, name);
-    debug('resolve to root: %s', location);
-    if (fileExists(location)) {
-        return location;
-    }
-
-    location = path.resolve(project, name);
-    debug('resolve to project: %s', location);
-    if (fileExists(location)) {
-        return location;
-    }
-    debug('using default: %s', name);
-    return name;
-}
-
-function isRemote(apiPath) {
-    return apiPath && apiPath.indexOf('http') === 0;
-}
-
-function isYaml(file) {
-    if (_s.endsWith(file, '.yaml') || _s.endsWith(file, '.yml')) {
-        return true;
-    }
-    return false;
-}
-
-function loadApi(apiPath, content) {
-    if (isYaml(apiPath)) {
-        debug('loading api using yaml');
-        return jsYaml.safeLoad(content);
-    }
-    debug('loading api using json');
-    return JSON.parse(content);
-}
+var helpers = require('../lib/helpers');
+var debug = helpers.debug;
 
 
 module.exports = yeoman.Base.extend({
@@ -110,16 +52,16 @@ module.exports = yeoman.Base.extend({
         }
     },
 
-    writing: {
+    configuring: {
         copyLocal: function () {
             var apiSrc, apiSrcPath, apiDestPath, apiPath;
 
-            apiSrcPath = findFile(this.config.get('apiPath'), this.env.cwd, this.appRoot);
+            apiSrcPath = helpers.findFile(this.config.get('apiPath'), this.env.cwd, this.appRoot);
             if (!apiSrcPath) {
                 this.env.error(new Error('missing or invalid required input `apiPath`'));
             }
 
-            if (isRemote(apiSrcPath)) {
+            if (helpers.isRemote(apiSrcPath)) {
                 debug('apiPath is URL: %s', apiSrcPath);
                 return;
             }
@@ -138,7 +80,7 @@ module.exports = yeoman.Base.extend({
 
             apiSrcPath = this.config.get('apiPath');
 
-            if (!isRemote(apiSrcPath)) {
+            if (!helpers.isRemote(apiSrcPath)) {
                 debug('apiPath is file: %s', apiSrcPath);
                 return;
             }
@@ -152,7 +94,7 @@ module.exports = yeoman.Base.extend({
 
             self.fetch(apiSrcPath, apiDestPath, function (err) {
                 if (err) {
-                    this.env.error(err);
+                    self.env.error(err);
                 }
                 self.config.set('apiPath', apiPath);
                 done();
@@ -164,17 +106,21 @@ module.exports = yeoman.Base.extend({
             var self, done;
 
             self = this;
-            self.api = loadApi(self.config.get('apiPath'), self.read(self.config.get('apiPath')));
+            self.api = helpers.loadApi(self.config.get('apiPath'),
+                self.read(self.config.get('apiPath')));
 
             done = self.async();
             enjoi(apischema).validate(self.api, function (error, value) {
                 if (error) {
-                    this.env.error(error);
+                    self.env.error(error);
                 }
                 done();
             });
-        },
+        }
 
+    },
+
+    writing: {
         server: function () {
 
             if (this.options['dry-run']) {
@@ -189,7 +135,7 @@ module.exports = yeoman.Base.extend({
             });
         },
 
-        models: function () {
+        genmodels: function () {
             this.options.api = this.api;
             this.composeWith('swaggerize:models', {
                 options: this.options,
@@ -199,7 +145,7 @@ module.exports = yeoman.Base.extend({
             });
         },
 
-        handlers: function () {
+        genhandlers: function () {
             this.options.api = this.api;
             this.composeWith('swaggerize:handlers', {
                 options: this.options,

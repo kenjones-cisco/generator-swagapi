@@ -1,6 +1,5 @@
 server:
   port: 8000
-
 <% if (database) {%>
 db:
   host: localhost

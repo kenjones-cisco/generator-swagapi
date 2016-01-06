@@ -2,7 +2,6 @@ debug: DEBUG
 
 server:
   port: SERVER_PORT
-
 <% if (database) {%>
 db:
   uri: DB_URI

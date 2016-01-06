@@ -8,28 +8,8 @@ var mkdirp = require('mkdirp');
 var methods = require('swagger-methods');
 var pluralize = require('pluralize');
 var upath = require('upath');
-
-var debug = require('util').debuglog('generator-swagapi');
-
-function prefix(str, pre) {
-    str = str || '';
-    if (str.indexOf(pre) === 0) {
-        return str;
-    }
-
-    str = pre + str;
-    return str;
-}
-
-function unprefix(str, pre) {
-    str = str || '';
-    if (str.indexOf(pre) === 0) {
-        str = str.substr(pre.length);
-        return str;
-    }
-
-    return str;
-}
+var helpers = require('../lib/helpers');
+var debug = helpers.debug;
 
 
 module.exports = yeoman.Base.extend({
@@ -108,7 +88,7 @@ module.exports = yeoman.Base.extend({
 
                 route = routes[routePath];
                 handlername = route.handler;
-                handlername = prefix(handlername, 'handlers/');
+                handlername = helpers.prefix(handlername, 'handlers/');
                 handlername = upath.addExt(handlername, '.js');
 
                 file = upath.joinSafe(self.appRoot, handlername);
@@ -202,7 +182,7 @@ module.exports = yeoman.Base.extend({
                 fileName = 'test' + opath.replace(/\//g, '_') + '.js';
                 if (def['x-handler']) {
                     fileName = def['x-handler'];
-                    fileName = 'test_' + unprefix(fileName, 'handlers/');
+                    fileName = 'test_' + helpers.unprefix(fileName, 'handlers/');
                     fileName = upath.addExt(fileName, '.js');
                 }
                 file = upath.joinSafe(self.appRoot, 'tests', fileName);

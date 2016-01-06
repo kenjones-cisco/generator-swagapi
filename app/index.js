@@ -6,8 +6,8 @@ var _s = require('underscore.string');
 var gulpif = require('gulp-if');
 var beautify = require('gulp-beautify');
 var upath = require('upath');
-
-var debug = require('util').debuglog('generator-swagapi');
+var helpers = require('../lib/helpers');
+var debug = helpers.debug;
 
 
 module.exports = yeoman.Base.extend({
@@ -117,7 +117,7 @@ module.exports = yeoman.Base.extend({
     },
 
     writing: {
-        spec: function () {
+        genspec: function () {
             this.composeWith('swaggerize:spec', {
                 options: this.options,
                 arguments: this.args
@@ -127,6 +127,7 @@ module.exports = yeoman.Base.extend({
         },
 
         app: function () {
+            var api;
 
             if (this.options['dry-run']) {
                 this.log.ok('(DRY-RUN) %s written', upath.joinSafe(this.appRoot, '.eslintrc'));
@@ -153,9 +154,15 @@ module.exports = yeoman.Base.extend({
             this.copy('gitignore', '.gitignore');
             this.copy('npmignore', '.npmignore');
 
-            this.template('_package.json', 'package.json', this.config.getAll());
+            api = helpers.loadApi(this.config.get('apiPath'),
+                this.read(this.config.get('apiPath')));
+
+            this.template('_package.json', 'package.json', {
+                slugName: this.config.get('slugName'),
+                api: api
+            });
             this.template('_README.md', 'README.md', {
-                slugName: this.config.get('slugName')
+                api: api
             });
 
             this.copy('_gulpfile.js', 'gulpfile.js');

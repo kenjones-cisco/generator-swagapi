@@ -1,7 +1,8 @@
 {
     "name" : "<%= slugName %>",
-    "description" : "",
-    "version" : "0.1.0",
+    "description" : "<%=api.info.description%>",
+    "version" : "<%=api.info.version%>",
+    "license": <% if (api.info.license && api.info.license.name) {%>"<%=api.info.license.name%>"<%} else {%>""<%}%>,
     "dependencies": {
         "express": "^4.13.0",
         "body-parser": "^1.14.0",
