@@ -40,7 +40,8 @@ module.exports = yeoman.Base.extend({
             required: true
         });
         this.appRoot = this.destinationRoot();
-        this.api = this.options.api;
+      this.api = this.options.api;
+      this.schemas = Object.keys(this.api.definitions);
     },
 
     writing: {
@@ -115,7 +116,11 @@ module.exports = yeoman.Base.extend({
 
                 // provides access to lodash within the template
                 route._ = _;
-                route.dbmodels = self._getDbModels(route);
+              route.dbmodels = self._getDbModels(route).map(function(model) {
+                model.path = upath.removeExt(upath.toUnix(path.relative(path.dirname(file), model.modelPath)), '.js');
+                return model;
+              });
+
                 if (!self.options['dry-run']) {
                     self.template('_handler.js', file, route);
                 } else {
@@ -232,24 +237,34 @@ module.exports = yeoman.Base.extend({
         if (!self.config.get('database')) {
             return null;
         }
-
-        route.path.split('/').forEach(function (element) {
-            if (element) {
-                single = pluralize.singular(element);
-                debug('element: %s single: %s', element, single);
-                dbFileName = upath.addExt(upath.joinSafe(self.appRoot, 'models', single), '.js');
-                if (self.fs.exists(dbFileName)) {
-                    className = _s.classify(single);
-                    dbModels.push({
-                        name: className,
-                        path: upath.removeExt(
-                            upath.toUnix(path.relative(relPath, dbFileName)), '.js')
-                    });
-                }
-            }
-        });
-        debug(dbModels);
-        return dbModels;
+      var results = route.methods.map(function(x) {
+        return x.responses['200'];
+      }).filter(function(x) {
+        return x.hasOwnProperty('schema');
+      });
+      var schemas = results.map(function(x) {
+        return x.schema['$ref'];
+      }).concat(
+        results.filter(function(x) {
+          return x.schema.type === 'array';
+        }).map(function(x) {
+          return x.schema.items['$ref']
+        })
+      ).filter(function(x) {
+        return x != undefined;
+      }).map(function(x) {
+        return x.substring(x.lastIndexOf('/') + 1);
+      });
+      dbModels = _.intersection(schemas, self.schemas).map(function(name) {
+        var dbfileName = upath.addExt(upath.joinSafe(self.appRoot, 'models', name), '.js');
+        return {
+          name: _s.classify(name),
+          modelPath: dbfileName,
+          path: upath.removeExt(upath.toUnix(path.relative(relPath, dbfileName)), '.js')
+        }
+      });
+      debug(dbModels);
+      return dbModels;
     }
 
 });

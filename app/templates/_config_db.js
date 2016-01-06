@@ -40,7 +40,7 @@ db.setup = function () {
 
     connection.once('connected', function () {
         logger.log('info', 'db connection established: (%s:%d/%s)', host, port, dbName);
-        this.connected = true;
+        db.connected = true;
     });
 
     connection.on('disconnecting', function () {
