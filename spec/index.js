@@ -128,6 +128,8 @@ module.exports = yeoman.Base.extend({
                 return;
             }
 
+            debug('server apiPath: %s', upath.normalizeSafe(
+                path.relative(this.appRoot, this.config.get('apiPath'))));
             this.template('_server.js', 'server.js', {
                 apiPath: upath.normalizeSafe(
                     path.relative(this.appRoot, this.config.get('apiPath'))),

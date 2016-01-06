@@ -206,7 +206,7 @@ module.exports = yeoman.Base.extend({
     _getDbModels: function getDbModels(route, relPath) {
         var self = this;
         var dbModels = [];
-        var single, dbFileName, className;
+        var single, dbFileName;
 
         if (!self.config.get('database')) {
             return null;
@@ -218,9 +218,10 @@ module.exports = yeoman.Base.extend({
                 debug('element: %s single: %s', element, single);
                 dbFileName = upath.addExt(upath.joinSafe(self.appRoot, 'models', single), '.js');
                 if (self.fs.exists(dbFileName)) {
-                    className = _s.classify(single);
+                    debug('handler dbmodel rel path: %s', upath.removeExt(
+                        upath.toUnix(path.relative(relPath, dbFileName)), '.js'));
                     dbModels.push({
-                        name: className,
+                        name: _s.classify(single),
                         path: upath.removeExt(
                             upath.toUnix(path.relative(relPath, dbFileName)), '.js')
                     });
