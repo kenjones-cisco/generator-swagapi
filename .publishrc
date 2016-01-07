@@ -1,0 +1,8 @@
+{
+    "confirm": true,
+    "sensitiveDataAudit": true,
+    "checkUncommitted": true,
+    "checkUntracked": true,
+    "validateGitTag": true,
+    "validateBranch": "master"
+}

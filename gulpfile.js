@@ -5,6 +5,7 @@ var istanbul = require('gulp-istanbul');
 var jasmine = require('gulp-jasmine');
 var eslint = require('gulp-eslint');
 var coveralls = require('gulp-coveralls');
+var publish = require('publish-please');
 
 var SOURCE_CODE = ['app/*.js', 'spec/*.js', 'models/*.js', 'handlers/*.js'];
 var TEST_CODE = ['test/*.js'];
@@ -43,4 +44,8 @@ gulp.task('lint', function () {
 gulp.task('coveralls', function () {
     return gulp.src('coverage/lcov.info')
         .pipe(coveralls());
+});
+
+gulp.task('publish', ['test'], function () {
+    return publish();
 });

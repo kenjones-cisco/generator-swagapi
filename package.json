@@ -43,13 +43,15 @@
     "gulp-istanbul": "^0.10.3",
     "gulp-eslint": "^1.1.1",
     "gulp-jasmine": "^2.1.0",
-    "gulp-coveralls": "^0.1.4"
+    "gulp-coveralls": "^0.1.4",
+    "publish-please": "^1.1.0"
   },
   "scripts": {
     "test": "gulp test",
     "cover": "gulp cover",
     "lint": "gulp lint",
-    "coveralls": "gulp coveralls"
+    "coveralls": "gulp coveralls",
+    "publish": "gulp publish"
   },
   "license": "Apache-2.0"
 }

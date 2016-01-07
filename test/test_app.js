@@ -241,3 +241,10 @@ describe('swaggerize:app', function () {
     });
 
 });
+
+// the use of helpers testDirectory results in changing
+// the cwd into a temp directory. So that other gulp commands
+// can be in the correct location, go back to the project root.
+afterAll(function () {
+    process.chdir(path.join(__dirname, '..'));
+});
