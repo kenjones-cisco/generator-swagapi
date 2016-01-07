@@ -7,7 +7,7 @@ var eslint = require('gulp-eslint');
 var coveralls = require('gulp-coveralls');
 var publish = require('publish-please');
 
-var SOURCE_CODE = ['app/*.js', 'spec/*.js', 'models/*.js', 'handlers/*.js'];
+var SOURCE_CODE = ['app/*.js', 'spec/*.js', 'models/*.js', 'handlers/*.js', 'lib/*.js'];
 var TEST_CODE = ['test/*.js'];
 
 gulp.task('pre-test', function () {
@@ -18,20 +18,16 @@ gulp.task('pre-test', function () {
         .pipe(istanbul.hookRequire());
 });
 
-gulp.task('test', ['lint', 'pre-test'], function () {
+gulp.task('test', ['lint'], function () {
     return gulp.src(TEST_CODE)
-        .pipe(jasmine())
-        // Creating the reports after tests ran
-        .pipe(istanbul.writeReports());
+        .pipe(jasmine());
 });
 
 gulp.task('cover', ['lint', 'pre-test'], function () {
     return gulp.src(TEST_CODE)
         .pipe(jasmine())
         // Creating the reports after tests ran
-        .pipe(istanbul.writeReports({
-            reporters: ['html', 'lcov']
-        }));
+        .pipe(istanbul.writeReports());
 });
 
 gulp.task('lint', function () {

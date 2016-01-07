@@ -8,6 +8,7 @@ var mkdirp = require('mkdirp');
 var methods = require('swagger-methods');
 var pluralize = require('pluralize');
 var upath = require('upath');
+var specutil = require('../lib/specutil');
 var helpers = require('../lib/helpers');
 var debug = helpers.debug;
 
@@ -97,6 +98,7 @@ module.exports = yeoman.Base.extend({
                 route._ = _;
                 route.dbmodels = self._getDbModels(route, path.dirname(file));
                 if (!self.options['dry-run']) {
+                    debug('generating handler %s', file);
                     self.template('_handler.js', file, route);
                 } else {
                     self.log.ok('(DRY-RUN) handler %s generated', file);
@@ -206,28 +208,40 @@ module.exports = yeoman.Base.extend({
     _getDbModels: function getDbModels(route, relPath) {
         var self = this;
         var dbModels = [];
-        var single, dbFileName;
+        var schemas, dbFileName;
 
-        if (!self.config.get('database')) {
+        if (!self.config.get('database') && !this.options.database) {
             return null;
         }
 
-        route.path.split('/').forEach(function (element) {
-            if (element) {
-                single = pluralize.singular(element);
-                debug('element: %s single: %s', element, single);
-                dbFileName = upath.addExt(upath.joinSafe(self.appRoot, 'models', single), '.js');
-                if (self.fs.exists(dbFileName)) {
-                    debug('handler dbmodel rel path: %s', upath.removeExt(
-                        upath.toUnix(path.relative(relPath, dbFileName)), '.js'));
-                    dbModels.push({
-                        name: _s.classify(single),
-                        path: upath.removeExt(
-                            upath.toUnix(path.relative(relPath, dbFileName)), '.js')
-                    });
-                }
+        function handleDbFile(name) {
+            dbFileName = upath.addExt(
+                upath.joinSafe(self.appRoot, 'models', name.toLowerCase()), '.js');
+            if (self.fs.exists(dbFileName)) {
+                debug('handler dbmodel rel path: %s', upath.removeExt(
+                    upath.toUnix(path.relative(relPath, dbFileName)), '.js'));
+                dbModels.push({
+                    name: _s.classify(name),
+                    path: upath.removeExt(
+                        upath.toUnix(path.relative(relPath, dbFileName)), '.js')
+                });
             }
-        });
+        }
+
+        schemas = specutil.getRespSchema(route);
+        if (!_.isEmpty(schemas)) {
+            _.forEach(schemas, function (schema) {
+                handleDbFile(schema);
+            });
+        } else {
+            debug('no schemas defined in responses; using path');
+            route.path.split('/').forEach(function (element) {
+                if (element) {
+                    handleDbFile(pluralize.singular(element));
+                }
+            });
+        }
+
         debug(dbModels);
         return dbModels;
     }

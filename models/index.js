@@ -4,6 +4,7 @@ var yeoman = require('yeoman-generator');
 var _ = require('lodash');
 var mkdirp = require('mkdirp');
 var upath = require('upath');
+var specutil = require('../lib/specutil');
 var helpers = require('../lib/helpers');
 var debug = helpers.debug;
 
@@ -69,6 +70,7 @@ module.exports = yeoman.Base.extend({
 
                 // provides access to lodash within the template
                 model._ = _;
+                model.helpers = specutil;
 
                 if (self.config.get('database')) {
                     debug('generating mongoose enabled model: %s', modelName);

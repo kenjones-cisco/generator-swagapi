@@ -92,12 +92,6 @@ paths:
       responses:
         "200":
           description: pet response
-          schema:
-            $ref: "#/definitions/Pet"
-        default:
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/Error"
     delete:
       description: deletes a single pet based on the ID supplied
       operationId: deletePet
@@ -111,10 +105,7 @@ paths:
       responses:
         "204":
           description: pet deleted
-        default:
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/Error"
+
 definitions:
   Pet:
     type: object
@@ -153,6 +144,15 @@ definitions:
         type: string
       name:
         type: string
+      alphas:
+        type: array
+        items:
+          $ref: '#/definitions/Kittena'
+      betas:
+        type: array
+        items:
+          $ref: '#/definitions/Kittenb'
+
   Kittena:
     x-parent: Cat
     type: object
