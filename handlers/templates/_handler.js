@@ -132,7 +132,7 @@ module.exports = {
 
                 case 'offset':
                     if (!_.isUndefined(item) && !_.isNaN(_.parseInt(item))) {
-                        options[key] = _.parseInt(item);
+                        options['skip'] = _.parseInt(item);
                     }
                     break;
 
