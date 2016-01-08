@@ -5,6 +5,128 @@ var specutil = require('../lib/specutil');
 
 describe('lib/specutil', function () {
 
+    describe('#makeTestData', function () {
+
+        it('no parameters and no schemas', function () {
+            expect(specutil.makeTestData()).toBe(null);
+        });
+
+        it('param ref does not match actual schemas', function () {
+            expect(specutil.makeTestData([{
+                in: 'body',
+                schema: {
+                    '$ref': '#/definitions/Fake'
+                }
+            }])).toBe(null);
+        });
+
+        it('param type not simple', function () {
+            var parameters = [{
+                in: 'body',
+                schema: {
+                    '$ref': '#/definitions/Sample'
+                }
+            }];
+            var schemas = {
+                Sample: {
+                    required: ['testArray', 'testObj'],
+                    properties: {
+                        testArray: {
+                            type: 'array'
+                        },
+                        testObj: {
+                            type: 'object'
+                        }
+                    }
+                }};
+            expect(specutil.makeTestData(parameters, schemas)).toEqual({
+                testArray: null,
+                testObj: null});
+        });
+
+        it('param type Number', function () {
+            var parameters = [{
+                in: 'body',
+                schema: {
+                    '$ref': '#/definitions/Sample'
+                }
+            }];
+            var schemas = {
+                Sample: {
+                    required: ['testNum'],
+                    properties: {
+                        testNum: {
+                            type: 'number'
+                        }
+                    }
+                }};
+            expect(specutil.makeTestData(parameters, schemas)).toEqual({
+                testNum: 1});
+        });
+
+        it('param type Boolean', function () {
+            var parameters = [{
+                in: 'body',
+                schema: {
+                    '$ref': '#/definitions/Sample'
+                }
+            }];
+            var schemas = {
+                Sample: {
+                    required: ['testBool'],
+                    properties: {
+                        testBool: {
+                            type: 'boolean'
+                        }
+                    }
+                }};
+            expect(specutil.makeTestData(parameters, schemas)).toEqual({
+                testBool: true});
+        });
+
+        it('param type Date', function () {
+            var parameters = [{
+                in: 'body',
+                schema: {
+                    '$ref': '#/definitions/Sample'
+                }
+            }];
+            var schemas = {
+                Sample: {
+                    required: ['testDate'],
+                    properties: {
+                        testDate: {
+                            type: 'date'
+                        }
+                    }
+                }};
+            // date matching exactly is too difficult and prone for random
+            // failures during testing; so as long as it is defined it is
+            // considered a success.
+            expect(specutil.makeTestData(parameters, schemas)).toBeDefined();
+        });
+
+        it('param type String', function () {
+            var parameters = [{
+                in: 'body',
+                schema: {
+                    '$ref': '#/definitions/Sample'
+                }
+            }];
+            var schemas = {
+                Sample: {
+                    required: ['testString'],
+                    properties: {
+                        testString: {
+                            type: 'string'
+                        }
+                    }
+                }};
+            expect(specutil.makeTestData(parameters, schemas)).toEqual({
+                testString: 'helloworld'});
+        });
+    });
+
     describe('#getSchema', function () {
 
         it('undefined inputs', function () {
@@ -170,8 +292,8 @@ describe('lib/specutil', function () {
                 }
             })).toEqual({
                 channel: {
-                    type: 'mongoose.Schema.Types.ObjectId',
-                    ref: 'Channel'
+                    type: '"mongoose.Schema.Types.ObjectId"',
+                    ref: '"Channel"'
                 }
             });
         });

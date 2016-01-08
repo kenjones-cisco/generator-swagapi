@@ -64,31 +64,8 @@ module.exports = yeoman.Base.extend({
                 mkdirp.sync(upath.joinSafe(this.appRoot, 'tests'));
             }
 
-            var operations;
             var self = this;
-            var api = self.api;
-            var models = {};
-
-            _.forEach(api.definitions || {}, function (modelSchema, key) {
-                var options = {};
-
-                if (!modelSchema.properties) {
-                    debug('model has no properties: %s', key);
-                    return;
-                }
-
-                if (modelSchema.required) {
-                    _.forEach(modelSchema.properties, function (property, propname) {
-                        if (_.contains(modelSchema.required, propname)) {
-                            options[propname] = specutil.getTestVal(property);
-                        }
-                    });
-                }
-
-                models[key] = options;
-            });
-
-            operations = self._formatRoutes(api.paths);
+            var operations = self._formatRoutes(self.api.paths);
 
             _.forEach(_.values(operations), function (operation) {
 
@@ -103,9 +80,10 @@ module.exports = yeoman.Base.extend({
                     self.template('_test.js', file, {
                         _: _,
                         util: util,
-                        resourcePath: api.basePath,
+                        specutil: specutil,
+                        resourcePath: self.api.basePath,
                         operations: operation,
-                        models: models
+                        models: self.api.definitions
                     });
                 } else {
                     self.log.ok('(DRY-RUN) test %s generated', file);

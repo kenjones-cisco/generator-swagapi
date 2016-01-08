@@ -21,14 +21,7 @@ describe('<%=operations.path%> tests', function () {
     describe('<%=operation.method%> <%=operations.path%> tests', function () {
 <%
     }
-    var sendData = false;
-    if (operation.parameters && operation.parameters.length) {
-        _.forEach(operation.parameters, function (param) {
-            if (param.in === 'body' && param.schema.$ref) {
-                sendData = models[param.schema.$ref.slice(param.schema.$ref.lastIndexOf('/') + 1)];
-            }
-        });
-    }
+    var sendData = specutil.makeTestData(operation.parameters, models);
 
     _.forEach(operation.responses, function (response, status) {
         if (status === 'default') {
