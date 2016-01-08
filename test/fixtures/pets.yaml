@@ -134,6 +134,13 @@ definitions:
         format: int32
       message:
         type: string
+
+  Dog:
+    type: object
+    properties:
+      id:
+        type: string
+
   Cat:
     x-children:
       - Kittena
@@ -162,17 +169,21 @@ definitions:
     required:
       - id
       - name
+      - born
     properties:
       id:
         type: string
       name:
         type: string
+      born:
+        type: date
   Kittenb:
     x-parent: Cat
     type: object
     required:
       - id
       - name
+      - found
     properties:
       id:
         type: string

@@ -1,16 +1,18 @@
 'use strict';
 
 var path = require('path');
+var util = require('util');
 var yeoman = require('yeoman-generator');
 var _ = require('lodash');
 var _s = require('underscore.string');
 var mkdirp = require('mkdirp');
-var methods = require('swagger-methods');
 var pluralize = require('pluralize');
 var upath = require('upath');
 var specutil = require('../lib/specutil');
 var helpers = require('../lib/helpers');
 var debug = helpers.debug;
+
+var METHODS = require('swagger-methods');
 
 
 module.exports = yeoman.Base.extend({
@@ -29,173 +31,80 @@ module.exports = yeoman.Base.extend({
             var routes, self;
 
             self = this;
-            routes = {};
 
             if (!self.options['dry-run']) {
                 mkdirp.sync(upath.joinSafe(self.appRoot, 'handlers'));
             }
 
-            _.forEach(this.api.paths, function (def, apipath) {
-                var pathnames, route;
+            routes = self._formatRoutes(self.api.paths);
 
-                route = {
-                    path: apipath,
-                    pathname: undefined,
-                    methods: [],
-                    handler: undefined
-                };
+            _.forEach(_.values(routes), function (route) {
 
-                pathnames = [];
+                var file = upath.joinSafe(
+                    self.appRoot,
+                    upath.addExt(helpers.prefix(route.handler, 'handlers/'), '.js'));
 
-                apipath.split('/').forEach(function (element) {
-                    if (element) {
-                        pathnames.push(element);
-                    }
-                });
-
-                route.pathname = pathnames.join('/');
-                // if handler specified within specification then use that path
-                // else default to the route path.
-                route.handler = def['x-handler'] || route.pathname;
-
-                _.forEach(methods, function (verb) {
-                    var operation = def[verb];
-
-                    if (!operation) {
-                        return;
-                    }
-
-                    route.methods.push({
-                        method: verb,
-                        name: operation.operationId || '',
-                        description: operation.description || '',
-                        parameters: operation.parameters || [],
-                        responses: operation.responses
-                    });
-
-                });
-
-                if (routes[route.pathname]) {
-                    routes[route.pathname].methods.push.apply(
-                        routes[route.pathname].methods, route.methods);
-                    return;
-                }
-
-                routes[route.pathname] = route;
-            });
-
-            Object.keys(routes).forEach(function (routePath) {
-                var handlername, route, file;
-
-                route = routes[routePath];
-                handlername = route.handler;
-                handlername = helpers.prefix(handlername, 'handlers/');
-                handlername = upath.addExt(handlername, '.js');
-
-                file = upath.joinSafe(self.appRoot, handlername);
-
-                // provides access to lodash within the template
-                route._ = _;
-                route.helpers = specutil;
                 route.dbmodels = self._getDbModels(route, path.dirname(file));
+
                 if (!self.options['dry-run']) {
+                    // provides access to lodash within the template
+                    route._ = _;
+                    route.helpers = specutil;
                     debug('generating handler %s', file);
                     self.template('_handler.js', file, route);
                 } else {
                     self.log.ok('(DRY-RUN) handler %s generated', file);
                 }
+
             });
         },
 
         tests: function () {
-            var self, api, models, resourcePath, modelsPath;
-
             if (!this.options['dry-run']) {
                 mkdirp.sync(upath.joinSafe(this.appRoot, 'tests'));
             }
 
-            self = this;
-            api = this.api;
-            models = {};
+            var operations;
+            var self = this;
+            var api = self.api;
+            var models = {};
 
-            modelsPath = upath.joinSafe(self.appRoot, 'models');
+            _.forEach(api.definitions || {}, function (modelSchema, key) {
+                var options = {};
 
-            if (api.definitions && modelsPath) {
-
-                _.forEach(api.definitions, function (modelSchema, key) {
-                    var options = {};
-
-                    if (!modelSchema.properties) {
-                        debug('model has no properties: %s', key);
-                        return;
-                    }
-
-                    Object.keys(modelSchema.properties).forEach(function (prop) {
-                        var defaultValue;
-
-                        switch (modelSchema.properties[prop].type) {
-                            case 'integer':
-                            case 'number':
-                            case 'byte':
-                                defaultValue = 1;
-                                break;
-                            case 'string':
-                                defaultValue = 'helloworld';
-                                break;
-                            case 'boolean':
-                                defaultValue = true;
-                                break;
-                            default:
-                                break;
-                        }
-
-                        if (modelSchema.required && !!~modelSchema.required.indexOf(prop)) {
-                            options[prop] = defaultValue;
-                        }
-                    });
-
-                    models[key] = options;
-                });
-
-            }
-            resourcePath = api.basePath;
-
-            _.forEach(api.paths, function (def, opath) {
-                var file, fileName, operations;
-
-                operations = [];
-
-                _.forEach(methods, function (verb) {
-                    var operation = {};
-
-                    if (!def[verb]) {
-                        return;
-                    }
-
-                    _.forEach(def[verb], function (op, key) {
-                        operation[key] = op;
-                    });
-
-                    operation.path = opath;
-                    operation.method = verb;
-
-                    operations.push(operation);
-                });
-
-                fileName = 'test' + opath.replace(/\//g, '_') + '.js';
-                if (def['x-handler']) {
-                    fileName = def['x-handler'];
-                    fileName = 'test_' + helpers.unprefix(fileName, 'handlers/');
-                    fileName = upath.addExt(fileName, '.js');
+                if (!modelSchema.properties) {
+                    debug('model has no properties: %s', key);
+                    return;
                 }
-                file = upath.joinSafe(self.appRoot, 'tests', fileName);
+
+                if (modelSchema.required) {
+                    _.forEach(modelSchema.properties, function (property, propname) {
+                        if (_.contains(modelSchema.required, propname)) {
+                            options[propname] = specutil.getTestVal(property);
+                        }
+                    });
+                }
+
+                models[key] = options;
+            });
+
+            operations = self._formatRoutes(api.paths);
+
+            _.forEach(_.values(operations), function (operation) {
+
+                var file = upath.joinSafe(
+                    self.appRoot,
+                    'tests',
+                    upath.addExt(helpers.prefix(
+                        helpers.unprefix(operation.handler, 'handlers/'), 'test_'), '.js'));
 
                 if (!self.options['dry-run']) {
                     debug('generating handler test %s', file);
                     self.template('_test.js', file, {
                         _: _,
-                        resourcePath: resourcePath,
-                        operations: operations,
+                        util: util,
+                        resourcePath: api.basePath,
+                        operations: operation,
                         models: models
                     });
                 } else {
@@ -204,6 +113,52 @@ module.exports = yeoman.Base.extend({
 
             });
         }
+    },
+
+    _formatRoutes: function formatRoutes(apiPaths) {
+        var routes = {};
+
+        _.forEach(apiPaths, function (def, apipath) {
+            var route = {
+                path: apipath,
+                pathname: undefined,
+                methods: [],
+                handler: undefined
+            };
+
+            route.pathname = specutil.normalizeURL(apipath);
+            // if handler specified within specification then use that path
+            // else default to the route path.
+            route.handler = def['x-handler'] || route.pathname;
+
+            _.forEach(def, function (operation, verb) {
+                // skip operations associated to invalid methods
+                if (!_.contains(METHODS, verb)) {
+                    return;
+                }
+
+                route.methods.push({
+                    method: verb,
+                    name: operation.operationId || '',
+                    description: operation.description || '',
+                    parameters: operation.parameters || [],
+                    responses: operation.responses
+                });
+            });
+
+            // this handles the scenario where the path is essentially
+            // the same like:
+            //  '/pets' ===  '/pets/'
+            if (routes[route.pathname]) {
+                routes[route.pathname].methods.push.apply(
+                    routes[route.pathname].methods, route.methods);
+                return;
+            }
+
+            routes[route.pathname] = route;
+        });
+
+        return routes;
     },
 
     _getDbModels: function getDbModels(route, relPath) {

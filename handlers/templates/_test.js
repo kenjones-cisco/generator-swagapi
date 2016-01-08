@@ -8,17 +8,17 @@ server.configure();
 <%
 var prevPath;
 var prevVerb;
-_.forEach(operations, function (operation) {
-    if (!prevPath || prevPath !== operation.path) {
-        prevPath = operation.path;
+_.forEach(operations.methods, function (operation) {
+    if (!prevPath || prevPath !== operations.path) {
+        prevPath = operations.path;
 %>
-describe('<%=operation.path%> tests', function () {
+describe('<%=operations.path%> tests', function () {
     var app = server.app;
 <%
     }
     if (!prevVerb || prevVerb !== operation.method) {
 %>
-    describe('<%=operation.method%> <%=operation.path%> tests', function () {
+    describe('<%=operation.method%> <%=operations.path%> tests', function () {
 <%
     }
     var sendData = false;
@@ -35,12 +35,10 @@ describe('<%=operation.path%> tests', function () {
             status = 500;
         }
 %>
-        xit('<%=status%> <%=operation.method%> <%=operation.path%> test', function (done) {<% if (sendData) {%>
-            var data = {<% _.forEach(Object.keys(sendData).filter(function (k) { return !!sendData[k]; }), function (k, i) {%>
-            '<%=k%>': <%-JSON.stringify(sendData[k])%><%if (i < Object.keys(sendData).filter(function (k) { return !!sendData[k]; }).length - 1) {%>, <%}%><%})%>
-            };<%}%>
+        xit('<%=status%> <%=operation.method%> <%=operations.path%> test', function (done) {<% if (sendData) {%>
+            var data = <%- util.inspect(sendData) %>;<%}%>
             request(app)
-                .<%=operation.method%>('<%=resourcePath%><%=operation.path%>')<% if (sendData) {%>
+                .<%=operation.method%>('<%=resourcePath%><%=operations.path%>')<% if (sendData) {%>
                 .send(data)<%}%>
                 .expect(<%=status%>)
                 .end(function (err, res) {
