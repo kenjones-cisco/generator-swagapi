@@ -104,7 +104,7 @@ module.exports = yeoman.Base.extend({
                 handler: undefined
             };
 
-            route.pathname = specutil.normalizeURL(apipath);
+            route.pathname = _.compact(apipath.split('/')).join('/');
             // if handler specified within specification then use that path
             // else default to the route path.
             route.handler = def['x-handler'] || route.pathname;
