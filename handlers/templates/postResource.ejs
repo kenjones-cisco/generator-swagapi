@@ -1,0 +1,6 @@
+        <%=Model%>.create(req.body).then(function (item) {
+            <%=formatSuccessResponse(method.responses, 'item')%>
+            return next();
+        }).then(null, function (err) {
+            return next(err);
+        });

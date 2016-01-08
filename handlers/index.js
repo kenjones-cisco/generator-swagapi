@@ -96,6 +96,7 @@ module.exports = yeoman.Base.extend({
 
                 // provides access to lodash within the template
                 route._ = _;
+                route.helpers = specutil;
                 route.dbmodels = self._getDbModels(route, path.dirname(file));
                 if (!self.options['dry-run']) {
                     debug('generating handler %s', file);
@@ -220,11 +221,13 @@ module.exports = yeoman.Base.extend({
             if (self.fs.exists(dbFileName)) {
                 debug('handler dbmodel rel path: %s', upath.removeExt(
                     upath.toUnix(path.relative(relPath, dbFileName)), '.js'));
-                dbModels.push({
-                    name: _s.classify(name),
-                    path: upath.removeExt(
-                        upath.toUnix(path.relative(relPath, dbFileName)), '.js')
-                });
+                if (!_.any(dbModels, {name: _s.classify(name)})) {
+                    dbModels.push({
+                        name: _s.classify(name),
+                        path: upath.removeExt(
+                            upath.toUnix(path.relative(relPath, dbFileName)), '.js')
+                    });
+                }
             }
         }
 
@@ -233,14 +236,13 @@ module.exports = yeoman.Base.extend({
             _.forEach(schemas, function (schema) {
                 handleDbFile(schema);
             });
-        } else {
-            debug('no schemas defined in responses; using path');
-            route.path.split('/').forEach(function (element) {
-                if (element) {
-                    handleDbFile(pluralize.singular(element));
-                }
-            });
         }
+
+        route.path.split('/').forEach(function (element) {
+            if (element) {
+                handleDbFile(pluralize.singular(element));
+            }
+        });
 
         debug(dbModels);
         return dbModels;

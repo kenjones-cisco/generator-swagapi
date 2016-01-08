@@ -159,7 +159,8 @@ module.exports = yeoman.Base.extend({
 
             this.template('_package.json', 'package.json', {
                 slugName: this.config.get('slugName'),
-                api: api
+                api: api,
+                _s: _s
             });
             this.template('_README.md', 'README.md', {
                 api: api
@@ -216,6 +217,7 @@ module.exports = yeoman.Base.extend({
                 return;
             }
 
+            /* istanbul ignore if */
             if (!this.options['dry-run']) {
                 this.npmInstall([], {
                     '--quiet': true

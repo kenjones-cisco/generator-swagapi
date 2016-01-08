@@ -1,0 +1,46 @@
+        var query = req.query;
+        var filters = {};
+        var fields = null;
+        var options = {};
+
+        _.forEach(query, function (item, key) {
+
+            switch (key) {
+                case 'fields':
+                    if (item) {
+                        fields = item.replace(',', ' ');
+                    }
+                    break;
+
+                case 'sort':
+                    if (item) {
+                        options[key] = item.replace(',', ' ');
+                    }
+                    break;
+
+                case 'offset':
+                    if (!_.isUndefined(item) && !_.isNaN(_.parseInt(item))) {
+                        options.skip = _.parseInt(item);
+                    }
+                    break;
+
+                case 'limit':
+                    if (!_.isUndefined(item) && !_.isNaN(_.parseInt(item))) {
+                        options[key] = _.parseInt(item);
+                    }
+                    break;
+                default:
+                    filters[key] = item;
+            }
+        });
+
+        if (_.isEmpty(options)) {
+            options = null;
+        }
+
+        <%=Model%>.find(filters, fields, options).exec().then(function (results) {
+            <%=formatSuccessResponse(method.responses, 'results')%>
+            return next();
+        }).then(null, function(err) {
+            return next(err);
+        });

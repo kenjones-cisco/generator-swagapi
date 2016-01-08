@@ -1,0 +1,18 @@
+        <%=Model%>.findById(req.params.parentId).exec().then(function (item) {
+            if (!item) {
+                res.sendStatus(404);
+                return next();
+            }
+            var subDoc = item.<%=subModelAttribute%>.addToSet(req.body);
+            if (!subDoc) {
+                res.sendStatus(400);
+                return next();
+            }
+            item.save(function (saveErr) {
+                return next(saveErr);
+            });
+            <%=formatSuccessResponse(method.responses, 'subDoc')%>
+            return next();
+        }).then(null, function (err) {
+            return next(err);
+        });

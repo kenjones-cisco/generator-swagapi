@@ -1,0 +1,12 @@
+        <%=Model%>.findById(req.params.id).exec().then(function (item) {
+            if (!item) {
+                res.sendStatus(404);
+                return next();
+            }
+
+            var subDoc = item.<%=subModelAttribute%>;
+            <%=formatSuccessResponse(method.responses, 'subDoc')%>
+            return next();
+        }).then(null, function (err) {
+            return next(err);
+        });

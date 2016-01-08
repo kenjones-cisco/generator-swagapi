@@ -93,11 +93,8 @@ module.exports = yeoman.Base.extend({
             apiPath = upath.joinSafe(apiDestPath, path.basename(apiSrc));
 
             self.fetch(apiSrcPath, apiDestPath, function (err) {
-                if (err) {
-                    self.env.error(err);
-                }
                 self.config.set('apiPath', apiPath);
-                done();
+                done(err);
             });
 
         },
@@ -111,10 +108,7 @@ module.exports = yeoman.Base.extend({
 
             done = self.async();
             enjoi(apischema).validate(self.api, function (error, value) {
-                if (error) {
-                    self.env.error(error);
-                }
-                done();
+                done(error);
             });
         }
 

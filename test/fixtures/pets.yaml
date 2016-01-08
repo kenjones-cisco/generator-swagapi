@@ -51,6 +51,9 @@ paths:
           description: unexpected error
           schema:
             $ref: "#/definitions/Error"
+  # this is the same path as the one above but this is a case of the user
+  # adding an extra '/' to the end. done for testing purposes only!
+  /pets/:
     post:
       description: Creates a new pet in the store.  Duplicates are allowed
       operationId: addPet
@@ -175,3 +178,10 @@ definitions:
         type: string
       name:
         type: string
+      found:
+        type: boolean
+  # this is a legal definition but it is not possible to create
+  # a model/object based on a simple type; here for testing
+  # purposes only
+  Other:
+    type: string

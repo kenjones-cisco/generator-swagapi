@@ -1,6 +1,6 @@
 {
     "name" : "<%= slugName %>",
-    "description" : "<%=api.info.description%>",
+    "description" : "<%= _s.trim(api.info.description) %>",
     "version" : "<%=api.info.version%>",
     "license": <% if (api.info.license && api.info.license.name) {%>"<%=api.info.license.name%>"<%} else {%>""<%}%>,
     "dependencies": {

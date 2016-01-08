@@ -63,27 +63,31 @@ describe('swaggerize:spec', function () {
         });
     });
 
-    xit('bad api file', function (done) {
+    it('bad api file', function (done) {
         var base = testutil.makeBase('spec');
 
         base.args = ['foo'];
         base.prompt.apiPath = path.join(__dirname, 'fixtures/badapi.json');
 
-        testutil.run(base, function (err) {
-            expect(err.name).toBe('ValidationError');
+        testutil.runGen(base, function (err) {
+            if (err) {
+                expect(err.name).toBe('ValidationError');
+            }
             done();
         });
 
     });
 
-    xit('missing api file', function (done) {
+    it('missing api file', function (done) {
         var base = testutil.makeBase('spec');
 
         base.args = ['foo'];
         base.prompt.apiPath = null;
 
-        testutil.run(base, function (err) {
-            expect(err.message).toMatch(/missing or invalid required input/);
+        testutil.runGen(base, function (err) {
+            if (err) {
+                expect(err.message).toMatch(/missing or invalid required input/);
+            }
             done();
         });
     });

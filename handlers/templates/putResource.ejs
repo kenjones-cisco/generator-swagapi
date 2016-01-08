@@ -1,0 +1,10 @@
+        <%=Model%>.findByIdAndUpdate(req.params.id, req.body, {'new': true}).exec().then(function (item) {
+            if (!item) {
+                res.sendStatus(404);
+                return next();
+            }
+            <%=formatSuccessResponse(method.responses, 'item')%>
+            return next();
+        }).then(null, function (err) {
+            return next(err);
+        });

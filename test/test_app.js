@@ -205,41 +205,6 @@ describe('swaggerize:app', function () {
         });
     });
 
-    xdescribe('#install', function () {
-        var originalTimeout;
-
-        beforeEach(function () {
-            originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
-        });
-
-        it('generate project and install', function (done) {
-            var base = testutil.makeBase('app');
-
-            base.options.apiPath = path.join(__dirname, 'fixtures/pets.json');
-            base.options['skip-install'] = false;
-
-            testutil.run(base, function (err) {
-                if (err) {
-                    return done.fail(err);
-                }
-                var build = require('child_process').spawn('npm', ['run', 'all'], {
-                    stdio: 'inherit'
-                });
-
-                build.on('close', function (code) {
-                    expect(code).toEqual(0);
-                    done();
-                });
-            });
-        });
-
-        afterEach(function () {
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-        });
-
-    });
-
 });
 
 // the use of helpers testDirectory results in changing
