@@ -1,5 +1,5 @@
         var fields = !req.query.fields ? null : req.query.fields.replace(',', ' ');
-        <%=Model%>.findById(req.params.id, fields).exec().then(function (item) {
+        <%=Model%>.findById(req.params.<%=id%>, fields).exec().then(function (item) {
             if (!item) {
                 res.sendStatus(404);
                 return next();

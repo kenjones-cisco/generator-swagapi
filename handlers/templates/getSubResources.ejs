@@ -1,4 +1,4 @@
-        <%=Model%>.findById(req.params.id).exec().then(function (item) {
+        <%=Model%>.findById(req.params.<%=id%>).exec().then(function (item) {
             if (!item) {
                 res.sendStatus(404);
                 return next();

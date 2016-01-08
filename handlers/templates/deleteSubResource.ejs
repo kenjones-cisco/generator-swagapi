@@ -1,9 +1,9 @@
-        <%=Model%>.findById(req.params.parentId).exec().then(function (item) {
+        <%=Model%>.findById(req.params.<%=parentId%>).exec().then(function (item) {
             if (!item) {
                 res.sendStatus(404);
                 return next();
             }
-            item.<%=subModelAttribute%>.id(req.params.id).remove();
+            item.<%=subModelAttribute%>.id(req.params.<%=id%>).remove();
             item.save(function (saveErr) {
                 return next(saveErr);
             });

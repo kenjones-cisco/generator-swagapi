@@ -1,4 +1,4 @@
-        <%=Model%>.findByIdAndUpdate(req.params.id, req.body, {'new': true}).exec().then(function (item) {
+        <%=Model%>.findByIdAndUpdate(req.params.<%=id%>, req.body, {'new': true}).exec().then(function (item) {
             if (!item) {
                 res.sendStatus(404);
                 return next();

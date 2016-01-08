@@ -7,7 +7,8 @@ var <%=dbmodel.name%> = require('<%=dbmodel.path%>');<%})%>
  * Operations on <%=path%>
  */
 module.exports = {
-<% _.forEach(methods, function (method, i) {%>
+<% var metadata = helpers.getPathMetadata(path);
+   _.forEach(methods, function (method, i) {%>
     /**
      * <%=method.description%>
      *
@@ -23,13 +24,13 @@ module.exports = {
     var includeOpts = {
         Model: dbmodels[0].name,
         method: method,
-        formatSuccessResponse: helpers.formatSuccessResponse
+        formatSuccessResponse: helpers.formatSuccessResponse,
+        subModelAttribute: metadata.subResource,
+        id: metadata.id,
+        parentId: metadata.parentId
     };
-    var includeSubOpts = _.defaults({
-        subModelAttribute: helpers.getSubResourceAttribute(path)
-    }, includeOpts);
 
-    switch (helpers.getPathType(path, method.method)) {
+    switch (method.method + metadata.type) {
         case 'getResources':%>
         <%- include('getResources', includeOpts); %>
         <%break;
@@ -37,28 +38,28 @@ module.exports = {
         <%- include('getResource', includeOpts); %>
         <%break;
         case 'getSubResources':%>
-        <%- include('getSubResources', includeSubOpts); %>
+        <%- include('getSubResources', includeOpts); %>
         <%break;
         case 'getSubResource':%>
-        <%- include('getSubResource', includeSubOpts); %>
+        <%- include('getSubResource', includeOpts); %>
         <%break;
         case 'putResource':%>
         <%- include('putResource', includeOpts); %>
         <%break;
         case 'putSubResource':%>
-        <%- include('putSubResource', includeSubOpts); %>
+        <%- include('putSubResource', includeOpts); %>
         <%break;
         case 'deleteResource':%>
         <%- include('deleteResource', includeOpts); %>
         <%break;
         case 'deleteSubResource':%>
-        <%- include('deleteSubResource', includeSubOpts); %>
+        <%- include('deleteSubResource', includeOpts); %>
         <%break;
-        case 'postResource':%>
-        <%- include('postResource', includeOpts); %>
+        case 'postResources':%>
+        <%- include('postResources', includeOpts); %>
         <%break;
-        case 'postSubResource':%>
-        <%- include('postSubResource', includeSubOpts); %>
+        case 'postSubResources':%>
+        <%- include('postSubResources', includeOpts); %>
         <%break;
         default:%>
         <%- include('default'); %>

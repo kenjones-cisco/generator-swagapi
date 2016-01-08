@@ -1,10 +1,10 @@
-        <%=Model%>.findById(req.params.parentId).exec().then(function (item) {
+        <%=Model%>.findById(req.params.<%=parentId%>).exec().then(function (item) {
             if (!item) {
                 res.sendStatus(404);
                 return next();
             }
 
-            var subDoc = item.<%=subModelAttribute%>.id(req.params.id);
+            var subDoc = item.<%=subModelAttribute%>.id(req.params.<%=id%>);
             if (!subDoc) {
                 res.sendStatus(404);
                 return next();

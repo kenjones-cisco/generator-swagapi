@@ -38,10 +38,12 @@ describe('lib/specutil', function () {
                             type: 'object'
                         }
                     }
-                }};
+                }
+            };
             expect(specutil.makeTestData(parameters, schemas)).toEqual({
                 testArray: null,
-                testObj: null});
+                testObj: null
+            });
         });
 
         it('param type Number', function () {
@@ -59,9 +61,11 @@ describe('lib/specutil', function () {
                             type: 'number'
                         }
                     }
-                }};
+                }
+            };
             expect(specutil.makeTestData(parameters, schemas)).toEqual({
-                testNum: 1});
+                testNum: 1
+            });
         });
 
         it('param type Boolean', function () {
@@ -79,9 +83,11 @@ describe('lib/specutil', function () {
                             type: 'boolean'
                         }
                     }
-                }};
+                }
+            };
             expect(specutil.makeTestData(parameters, schemas)).toEqual({
-                testBool: true});
+                testBool: true
+            });
         });
 
         it('param type Date', function () {
@@ -99,7 +105,8 @@ describe('lib/specutil', function () {
                             type: 'date'
                         }
                     }
-                }};
+                }
+            };
             // date matching exactly is too difficult and prone for random
             // failures during testing; so as long as it is defined it is
             // considered a success.
@@ -121,9 +128,11 @@ describe('lib/specutil', function () {
                             type: 'string'
                         }
                     }
-                }};
+                }
+            };
             expect(specutil.makeTestData(parameters, schemas)).toEqual({
-                testString: 'helloworld'});
+                testString: 'helloworld'
+            });
         });
     });
 
@@ -331,95 +340,86 @@ describe('lib/specutil', function () {
 
     });
 
-    describe('#getPathType', function () {
+    describe('#getPathMetadata', function () {
 
-        it('GET no param ids', function () {
-            expect(specutil.getPathType('/pets', 'get'))
-                .toBe('getResources');
+        it('root path only', function () {
+            expect(specutil.getPathMetadata('/'))
+                .toEqual({
+                    type: null,
+                    subResource: null,
+                    parentId: null,
+                    id: null
+                });
         });
 
-        it('GET param id - no parent', function () {
-            expect(specutil.getPathType('/pets/{id}', 'get'))
-                .toBe('getResource');
+        it('no param ids', function () {
+            expect(specutil.getPathMetadata('/pets'))
+                .toEqual({
+                    type: 'Resources',
+                    subResource: 'pets',
+                    parentId: null,
+                    id: null
+                });
         });
 
-        it('GET param parentId - no id', function () {
-            expect(specutil.getPathType('/pets/{parentId}', 'get'))
-                .toBe(null); // invalid
+        it('param id - no parent', function () {
+            expect(specutil.getPathMetadata('/pets/{id}'))
+                .toEqual({
+                    type: 'Resource',
+                    subResource: 'pets',
+                    parentId: null,
+                    id: 'id'
+                });
         });
 
-        it('GET param id - child resources', function () {
-            expect(specutil.getPathType('/pets/{id}/toys', 'get'))
-                .toBe('getSubResources');
+        it('param parentId - no id', function () {
+            expect(specutil.getPathMetadata('/pets/{parentId}'))
+                .toEqual({
+                    type: 'Resource',
+                    subResource: 'pets',
+                    parentId: null,
+                    id: 'parentId'
+                });
         });
 
-        it('GET param parentid and id', function () {
-            expect(specutil.getPathType('/pets/{parentId}/toys/{id}', 'get'))
-                .toBe('getSubResource');
+        it('param id - child resources', function () {
+            expect(specutil.getPathMetadata('/pets/{id}/toys'))
+                .toEqual({
+                    type: 'SubResources',
+                    subResource: 'toys',
+                    parentId: null,
+                    id: 'id'
+                });
         });
 
-        it('PUT no param ids', function () {
-            expect(specutil.getPathType('/pets', 'put'))
-                .toBe(null);
+        it('param parentid and id', function () {
+            expect(specutil.getPathMetadata('/pets/{parentId}/toys/{id}'))
+                .toEqual({
+                    type: 'SubResource',
+                    subResource: 'toys',
+                    parentId: 'parentId',
+                    id: 'id'
+                });
         });
 
-        it('PUT param id - no parent', function () {
-            expect(specutil.getPathType('/pets/{id}', 'put'))
-                .toBe('putResource');
+        it('path with extra slash', function () {
+            expect(specutil.getPathMetadata('/pets/'))
+                .toEqual({
+                    type: 'Resources',
+                    subResource: 'pets',
+                    parentId: null,
+                    id: null
+                });
         });
 
-        it('PUT param id - child resources', function () {
-            expect(specutil.getPathType('/pets/{id}/toys', 'put'))
-                .toBe(null); // invalid REST API
-        });
-
-        it('PUT param parentid and id', function () {
-            expect(specutil.getPathType('/pets/{parentId}/toys/{id}', 'put'))
-                .toBe('putSubResource');
-        });
-
-        it('DELETE no param ids', function () {
-            expect(specutil.getPathType('/pets', 'delete'))
-                .toBe(null);
-        });
-
-        it('DELETE param id - no parent', function () {
-            expect(specutil.getPathType('/pets/{id}', 'delete'))
-                .toBe('deleteResource');
-        });
-
-        it('DELETE param id - child resources', function () {
-            expect(specutil.getPathType('/pets/{id}/toys', 'delete'))
-                .toBe(null); // invalid REST API (delete should be specific items)
-        });
-
-        it('DELETE param parentid and id', function () {
-            expect(specutil.getPathType('/pets/{parentId}/toys/{id}', 'delete'))
-                .toBe('deleteSubResource');
-        });
-
-        it('POST no param ids', function () {
-            expect(specutil.getPathType('/pets', 'post'))
-                .toBe('postResource');
-        });
-
-        it('POST param id - no parent', function () {
-            expect(specutil.getPathType('/pets/{id}', 'post'))
-                .toBe('postSubResource'); // FIXME
-        });
-
-        it('POST param id - child resources', function () {
-            expect(specutil.getPathType('/pets/{id}/toys', 'post'))
-                .toBe('postSubResource');
-        });
-
-        it('POST param parentid and id', function () {
-            expect(specutil.getPathType('/pets/{parentId}/toys/{id}', 'post'))
-                .toBe('postSubResource');
-        });
-
-        it('PATCH no param ids', function () {
-            expect(specutil.getPathType('/pets/', 'patch')).toBe(null);
+        it('more than two path params', function () {
+            expect(specutil.getPathMetadata('/pets/{petId}/toys/{toyId}/balls/{ballId}'))
+                .toEqual({
+                    type: null,
+                    subResource: 'balls',
+                    parentId: 'petId',
+                    id: 'toyId'
+                });
         });
 
     });
