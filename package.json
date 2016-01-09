@@ -47,7 +47,6 @@
     "gulp-conventional-changelog": "^0.7.0",
     "gulp-git": "^1.6.1",
     "gulp-bump": "^1.0.0",
-    "gulp-tag-version": "^1.3.0",
     "publish-please": "^1.1.0"
   },
   "scripts": {
@@ -55,12 +54,12 @@
     "cover": "gulp cover",
     "lint": "gulp lint",
     "coveralls": "gulp coveralls",
-    "bump-patch": "gulp patch",
-    "bump-feature": "gulp feature",
-    "bump-release": "gulp release",
+    "bump-patch": "gulp bump-patch",
+    "bump-feature": "gulp bump-feature",
+    "bump-release": "gulp bump-release",
     "changelog": "gulp changelog",
-    "tag-release": "gulp tag",
-    "publish": "gulp publish"
+    "tag-release": "gulp tag-release",
+    "pub-release": "gulp pub-release"
   },
   "license": "Apache-2.0"
 }

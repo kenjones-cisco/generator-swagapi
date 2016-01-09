@@ -10,10 +10,12 @@ var publish = require('publish-please');
 var conventionalChangelog = require('gulp-conventional-changelog');
 var git = require('gulp-git');
 var bump = require('gulp-bump');
-var tag_version = require('gulp-tag-version');
 
 var SOURCE_CODE = ['app/*.js', 'spec/*.js', 'models/*.js', 'handlers/*.js', 'lib/*.js'];
 var TEST_CODE = ['test/*.js'];
+
+var version = 'v' + JSON.parse(fs.readFileSync('./package.json')).version;
+
 
 gulp.task('pre-test', function () {
     return gulp.src(SOURCE_CODE)
@@ -67,28 +69,31 @@ function inc(importance) {
         .pipe(gulp.dest('./'));
 }
 
-gulp.task('patch', function() {
+gulp.task('bump-patch', function() {
     return inc('patch');
 });
 
-gulp.task('feature', function() {
+gulp.task('bump-feature', function() {
     return inc('minor');
 });
 
-gulp.task('release', function() {
+gulp.task('bump-release', function() {
     return inc('major');
 });
 
-gulp.task('relcommit', ['changelog'], function () {
-    var version = JSON.parse(fs.readFileSync('./package.json')).version;
-    return gulp.src(['./package.json', './CHANGELOD.md'])
-        .pipe(git.commit('chore(release): Release v' + version));
+gulp.task('commit-release', ['changelog'], function () {
+    return gulp.src(['./package.json', './CHANGELOG.md'])
+        .pipe(git.commit('chore(release): Release ' + version));
 });
 
-gulp.task('tag', ['relcommit'], function() {
-    return gulp.src(['./package.json']).pipe(tag_version({label: 'Release %t'}));
+gulp.task('tag-release', ['commit-release'], function () {
+    git.tag(version, 'Release ' + version, function (err) {
+        if (err) {
+            throw err;
+        }
+    });
 });
 
-gulp.task('publish', ['test'], function () {
+gulp.task('pub-release', ['test'], function () {
     return publish();
 });
