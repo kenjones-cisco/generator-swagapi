@@ -1,7 +1,7 @@
 {
   "name": "generator-swagapi",
   "description": "Yeoman generator for swagger-based express application.",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "author": "Kenny Jones <kenjones@cisco.com>",
   "keywords": [
     "yeoman",

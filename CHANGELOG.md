@@ -1,5 +1,5 @@
-<a name="0.1.3"></a>
-## [0.1.3](https://github.com/kenjones-cisco/generator-swagapi/compare/v0.1.3...v0.1.3) (2016-01-09)
+<a name="0.2.0"></a>
+# [0.2.0](https://github.com/kenjones-cisco/generator-swagapi/compare/v0.1.3...v0.2.0) (2016-01-09)
 
 
 ### Bug Fixes
