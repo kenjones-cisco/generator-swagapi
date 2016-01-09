@@ -55,14 +55,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # accessing "localhost:8080" will access port 80 on the guest machine.
   config.vm.network "forwarded_port", guest: 8080, host: 8080
 
-  config.vm.synced_folder ".", "/home/vagrant/swagapi", type: "rsync", rsync__exclude: ["node_modules/", "coverage/"]
+  config.vm.synced_folder ".", "/home/vagrant/generator-swagapi", type: "rsync", rsync__exclude: ["node_modules/", "coverage/"]
 
   config.vm.provision "docker" do |d|
     # pull down base images
     d.pull_images "ubuntu:14.04"
     d.pull_images "node:4"
 
-    d.build_image "/home/vagrant/swagapi", args: "-t kenjones/generator-swagapi"
+    d.build_image "/home/vagrant/generator-swagapi", args: "-t kenjones/generator-swagapi"
   end
 
   # make it so your git will continue to work even within the VM
