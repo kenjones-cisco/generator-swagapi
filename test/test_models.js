@@ -13,7 +13,8 @@ describe('swaggerize:models', function () {
         var base = testutil.makeBase('models');
 
         base.args = ['foo'];
-        base.options.api = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/pets.json')));
+        base.options.props.api = JSON.parse(
+            fs.readFileSync(path.join(__dirname, 'fixtures/pets.json')));
 
         testutil.run(base, function (err) {
             if (err) {
@@ -32,7 +33,7 @@ describe('swaggerize:models', function () {
         var base = testutil.makeBase('models');
 
         base.args = ['foo'];
-        base.options.api = jsYaml.safeLoad(
+        base.options.props.api = jsYaml.safeLoad(
             fs.readFileSync(path.join(__dirname, 'fixtures/pets.yaml')));
 
         testutil.run(base, function (err) {

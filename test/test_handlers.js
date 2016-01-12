@@ -13,9 +13,9 @@ describe('swaggerize:handlers', function () {
         var base = testutil.makeBase('handlers');
 
         base.args = ['foo'];
-        base.options.api = jsYaml.safeLoad(
+        base.options.props.api = jsYaml.safeLoad(
             fs.readFileSync(path.join(__dirname, 'fixtures/pets.yaml')));
-        base.options.database = 'test';
+        base.options.props.database = 'test';
 
         testutil.run(base, function (err) {
             if (err) {

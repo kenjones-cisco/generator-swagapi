@@ -23,7 +23,7 @@ module.exports = yeoman.Base.extend({
             required: true
         });
         this.appRoot = this.destinationRoot();
-        this.api = this.options.api;
+        this.props = this.options.props;
     },
 
     writing: {
@@ -36,7 +36,7 @@ module.exports = yeoman.Base.extend({
                 mkdirp.sync(upath.joinSafe(self.appRoot, 'handlers'));
             }
 
-            routes = self._formatRoutes(self.api.paths);
+            routes = self._formatRoutes(self.props.api.paths);
 
             _.forEach(_.values(routes), function (route) {
 
@@ -65,7 +65,7 @@ module.exports = yeoman.Base.extend({
             }
 
             var self = this;
-            var operations = self._formatRoutes(self.api.paths);
+            var operations = self._formatRoutes(self.props.api.paths);
 
             _.forEach(_.values(operations), function (operation) {
 
@@ -81,9 +81,9 @@ module.exports = yeoman.Base.extend({
                         _: _,
                         util: util,
                         specutil: specutil,
-                        resourcePath: self.api.basePath,
+                        resourcePath: self.props.api.basePath,
                         operations: operation,
-                        models: self.api.definitions
+                        models: self.props.api.definitions
                     });
                 } else {
                     self.log.ok('(DRY-RUN) test %s generated', file);
@@ -144,7 +144,7 @@ module.exports = yeoman.Base.extend({
         var dbModels = [];
         var schemas, dbFileName;
 
-        if (!self.config.get('database') && !this.options.database) {
+        if (!self.props.database) {
             return null;
         }
 

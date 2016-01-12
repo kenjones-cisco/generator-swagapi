@@ -2,6 +2,7 @@
 
 var path = require('path');
 var yeoman = require('yeoman-generator');
+var _ = require('lodash');
 var _s = require('underscore.string');
 var gulpif = require('gulp-if');
 var beautify = require('gulp-beautify');
@@ -11,29 +12,32 @@ var debug = helpers.debug;
 
 
 module.exports = yeoman.Base.extend({
+    constructor: function () {
+        yeoman.Base.apply(this, arguments);
+        this.argument('name', {
+            type: String,
+            required: false
+        });
+
+        this.option('dry-run', {
+            type: Boolean,
+            desc: 'Do not make changes just display changes that would have been made',
+            default: false
+        });
+        this.option('apiPath', {
+            type: String,
+            desc: 'Specifiy local path or URL of Swagger API spec'
+        });
+        this.option('database', {
+            type: String,
+            desc: 'The database name to use with mongoose'
+        });
+    },
+
     initializing: {
         init: function () {
-            this.argument('name', {
-                type: String,
-                required: false
-            });
-
-            this.option('dry-run', {
-                type: Boolean,
-                desc: 'Do not make changes just display changes that would have been made',
-                defaults: false
-            });
-            this.option('apiPath', {
-                type: String,
-                desc: 'Specifiy local path or URL of Swagger API spec'
-            });
-            this.option('database', {
-                type: String,
-                desc: 'The database name to use with mongoose'
-            });
-
+            this.props = {};
             this.log('Swagapi Generator');
-
         }
     },
 
@@ -78,7 +82,7 @@ module.exports = yeoman.Base.extend({
                 this.log('Running in dry-run mode');
             }
 
-            this.config.defaults({
+            this.props = _.defaults(this.props, {
                 appname: this.appname,
                 slugName: _s.slugify(this.appname),
                 apiPath: options.apiPath,
@@ -95,21 +99,15 @@ module.exports = yeoman.Base.extend({
                 message: 'The database name to use with mongoose',
                 name: 'database',
                 type: 'input',
-                when: function () {
-                    return !self.config.get('database');
-                }
+                when: !self.props.database
             }];
 
             self.prompt(prompts, function (answers) {
-                for (var key in answers) {
-                    debug('prompt results: %s =>', key, answers[key]);
-                    if (typeof answers[key] !== 'undefined' && answers[key] !== null) {
-                        debug('setting key value: %s', key);
-                        self.config.set(key, answers[key]);
-                    }
+                debug('prompt results: database =>', answers.database);
+                if (helpers.hasValue(answers.database)) {
+                    debug('setting value for database');
+                    self.props.database = answers.database;
                 }
-
-                self.config.save();
                 next();
             });
         }
@@ -118,7 +116,8 @@ module.exports = yeoman.Base.extend({
 
     writing: {
         genspec: function () {
-            this.composeWith('swaggerize:spec', {
+            this.options.props = this.props;
+            this.composeWith('swagapi:spec', {
                 options: this.options,
                 arguments: this.args
             }, {
@@ -154,11 +153,10 @@ module.exports = yeoman.Base.extend({
             this.copy('gitignore', '.gitignore');
             this.copy('npmignore', '.npmignore');
 
-            api = helpers.loadApi(this.config.get('apiPath'),
-                this.read(this.config.get('apiPath')));
+            api = helpers.loadApi(this.props.apiPath, this.read(this.props.apiPath));
 
             this.template('_package.json', 'package.json', {
-                slugName: this.config.get('slugName'),
+                slugName: this.props.slugName,
                 api: api,
                 _s: _s
             });
@@ -170,17 +168,17 @@ module.exports = yeoman.Base.extend({
             this.copy('_logger.js', upath.joinSafe(this.appRoot, 'config', 'logger.js'));
             this.copy('_errors.js', upath.joinSafe(this.appRoot, 'config', 'errors.js'));
             this.template('default.yml', upath.joinSafe(this.appRoot, 'config', 'default.yml'), {
-                database: this.config.get('database')
+                database: this.props.database
             });
             this.template('custom-environment-variables.yml',
                 upath.joinSafe(this.appRoot, 'config', 'custom-environment-variables.yml'), {
-                    database: this.config.get('database')
+                    database: this.props.database
                 });
 
         },
 
         database: function () {
-            if (!this.config.get('database')) {
+            if (!this.props.database) {
                 debug('skipping database setup generation');
                 return;
             }
@@ -193,7 +191,7 @@ module.exports = yeoman.Base.extend({
 
             debug('generating database configuration files');
             this.template('_config_db.js', upath.joinSafe('config', 'db.js'), {
-                database: this.config.get('database')
+                database: this.props.database
             });
         },
 

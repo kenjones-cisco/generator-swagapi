@@ -17,7 +17,7 @@ module.exports = yeoman.Base.extend({
             required: true
         });
         this.appRoot = this.destinationRoot();
-        this.api = this.options.api;
+        this.props = this.options.props;
     },
 
     writing: {
@@ -30,7 +30,7 @@ module.exports = yeoman.Base.extend({
                 mkdirp.sync(basePath);
             }
 
-            if (self.config.get('database')) {
+            if (self.props.database) {
                 if (!self.options['dry-run']) {
                     self.copy('_models_index.js',
                         upath.joinSafe(self.appRoot, 'models', 'index.js'));
@@ -39,7 +39,7 @@ module.exports = yeoman.Base.extend({
                 }
             }
 
-            _.forEach(this.api.definitions, function (model, modelName) {
+            _.forEach(this.props.api.definitions, function (model, modelName) {
                 if (!model.properties) {
                     debug('model has no properties: %s', modelName);
                     return;
@@ -56,7 +56,7 @@ module.exports = yeoman.Base.extend({
                     debug('children: %s', model['x-children']);
                     _.forEach(model['x-children'], function(childName) {
                         debug('childName: %s', childName);
-                        model.children[childName] = self.api.definitions[childName];
+                        model.children[childName] = self.props.api.definitions[childName];
                     });
                 }
 
@@ -72,7 +72,7 @@ module.exports = yeoman.Base.extend({
                 model._ = _;
                 model.helpers = specutil;
 
-                if (self.config.get('database')) {
+                if (self.props.database) {
                     debug('generating mongoose enabled model: %s', modelName);
                     if (!self.options['dry-run']) {
                         self.template('_model_mongoose.js', file, model);

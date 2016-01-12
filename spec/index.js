@@ -21,6 +21,7 @@ module.exports = yeoman.Base.extend({
             required: true
         });
         this.appRoot = this.destinationRoot();
+        this.props = this.options.props;
     },
 
     prompting: {
@@ -32,33 +33,35 @@ module.exports = yeoman.Base.extend({
                 message: 'Path (or URL) to swagger document',
                 name: 'apiPath',
                 type: 'input',
-                when: function () {
-                    return !self.config.get('apiPath');
-                }
+                when: !self.props.apiPath
             }];
 
             self.prompt(prompts, function (answers) {
-                for (var key in answers) {
-                    debug('prompt results: %s =>', key, answers[key]);
-                    if (typeof answers[key] !== 'undefined' && answers[key] !== null) {
-                        debug('setting key value: %s', key);
-                        self.config.set(key, answers[key]);
-                    }
+                debug('prompt results: apiPath =>', answers.apiPath);
+                if (helpers.hasValue(answers.apiPath)) {
+                    debug('setting value for apiPath');
+                    self.props.apiPath = answers.apiPath;
                 }
-
-                self.config.save();
                 next();
             });
+        },
+
+        checkPath: function () {
+            debug('apiPath is: %s', this.props.apiPath);
+            if (!this.props.apiPath) {
+                this.env.error(new Error('missing required input `apiPath`'));
+            }
         }
+
     },
 
     configuring: {
         copyLocal: function () {
             var apiSrc, apiSrcPath, apiDestPath, apiPath;
 
-            apiSrcPath = helpers.findFile(this.config.get('apiPath'), this.env.cwd, this.appRoot);
+            apiSrcPath = helpers.findFile(this.props.apiPath, this.env.cwd, this.appRoot);
             if (!apiSrcPath) {
-                this.env.error(new Error('missing or invalid required input `apiPath`'));
+                this.env.error(new Error('invalid required input `apiPath`'));
             }
 
             if (helpers.isRemote(apiSrcPath)) {
@@ -71,14 +74,14 @@ module.exports = yeoman.Base.extend({
             apiPath = upath.joinSafe(apiDestPath, path.basename(apiSrc));
 
             this.copy(apiSrc, apiPath);
-            this.config.set('apiPath', apiPath);
+            this.props.apiPath = apiPath;
 
         },
 
         copyRemote: function () {
             var apiSrc, apiSrcPath, apiDestPath, apiPath, done, self;
 
-            apiSrcPath = this.config.get('apiPath');
+            apiSrcPath = this.props.apiPath;
 
             if (!helpers.isRemote(apiSrcPath)) {
                 debug('apiPath is file: %s', apiSrcPath);
@@ -93,7 +96,7 @@ module.exports = yeoman.Base.extend({
             apiPath = upath.joinSafe(apiDestPath, path.basename(apiSrc));
 
             self.fetch(apiSrcPath, apiDestPath, function (err) {
-                self.config.set('apiPath', apiPath);
+                self.props.apiPath = apiPath;
                 done(err);
             });
 
@@ -103,11 +106,12 @@ module.exports = yeoman.Base.extend({
             var self, done;
 
             self = this;
-            self.api = helpers.loadApi(self.config.get('apiPath'),
-                self.read(self.config.get('apiPath')));
+            self.props.api = helpers.loadApi(self.props.apiPath,
+                self.read(self.props.apiPath));
 
             done = self.async();
-            enjoi(apischema).validate(self.api, function (error, value) {
+            enjoi(apischema).validate(self.props.api, function (error, value) {
+                debug('validateSpec error:', error);
                 done(error);
             });
         }
@@ -123,17 +127,17 @@ module.exports = yeoman.Base.extend({
             }
 
             debug('server apiPath: %s', upath.normalizeSafe(
-                path.relative(this.appRoot, this.config.get('apiPath'))));
+                path.relative(this.appRoot, this.props.apiPath)));
             this.template('_server.js', 'server.js', {
                 apiPath: upath.normalizeSafe(
-                    path.relative(this.appRoot, this.config.get('apiPath'))),
-                database: this.config.get('database')
+                    path.relative(this.appRoot, this.props.apiPath)),
+                database: this.props.database
             });
         },
 
         genmodels: function () {
-            this.options.api = this.api;
-            this.composeWith('swaggerize:models', {
+            this.options.props = this.props;
+            this.composeWith('swagapi:models', {
                 options: this.options,
                 arguments: this.args
             }, {
@@ -142,8 +146,8 @@ module.exports = yeoman.Base.extend({
         },
 
         genhandlers: function () {
-            this.options.api = this.api;
-            this.composeWith('swaggerize:handlers', {
+            this.options.props = this.props;
+            this.composeWith('swagapi:handlers', {
                 options: this.options,
                 arguments: this.args
             }, {

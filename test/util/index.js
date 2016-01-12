@@ -1,10 +1,11 @@
 'use strict';
 
 var path = require('path');
-var helpers = require('yeoman-generator').test;
+var helpers = require('yeoman-test');
 
 var util = module.exports;
 
+var BASE_DIR = path.join(__dirname, '..', '..');
 
 util.makeBase = function makeBase(generator) {
     return {
@@ -14,14 +15,15 @@ util.makeBase = function makeBase(generator) {
         args: [],
 
         dependencies: [
-            path.join(__dirname, '..', '..', 'app'),
-            path.join(__dirname, '..', '..', 'spec'),
-            path.join(__dirname, '..', '..', 'models'),
-            path.join(__dirname, '..', '..', 'handlers')
+            path.join(BASE_DIR, 'app'),
+            path.join(BASE_DIR, 'spec'),
+            path.join(BASE_DIR, 'models'),
+            path.join(BASE_DIR, 'handlers')
         ],
 
         options: {
-            'skip-install': true
+            'skip-install': true,
+            'props': {}
         },
 
         prompt: {
@@ -31,16 +33,34 @@ util.makeBase = function makeBase(generator) {
 };
 
 util.runGen = function (config, done) {
-    helpers.run(path.join(__dirname, '..', '..', config.gen))
+    this.errorCalled = false;
+
+    function error(err) {
+        if (this.errorCalled) {
+            return;
+        }
+        this.errorCalled = true;
+        done(err);
+    }
+
+    function end(err) {
+        if (this.errorCalled) {
+            return;
+        }
+        this.errorCalled = true;
+        done(err);
+    }
+
+    helpers.run(path.join(BASE_DIR, config.gen))
         .withOptions(config.options)
         .withArguments(config.args)
         .withPrompts(config.prompt)
-        .on('error', done)
-        .on('end', done);
+        .on('error', error)
+        .on('end', end);
 };
 
 util.run = function run(config, done) {
-    var dir = path.join(__dirname, '..', '..', 'tmp');
+    var dir = path.join(BASE_DIR, 'tmp');
 
     helpers.testDirectory(dir, function (err) {
         if (err) {

@@ -70,24 +70,35 @@ describe('swaggerize:spec', function () {
         base.prompt.apiPath = path.join(__dirname, 'fixtures/badapi.json');
 
         testutil.runGen(base, function (err) {
-            if (err) {
-                expect(err.name).toBe('ValidationError');
-            }
+            expect(err).toBeDefined();
+            expect(err.name).toBe('ValidationError');
             done();
         });
 
     });
 
-    it('missing api file', function (done) {
+    it('no api file', function (done) {
         var base = testutil.makeBase('spec');
 
         base.args = ['foo'];
         base.prompt.apiPath = null;
 
         testutil.runGen(base, function (err) {
-            if (err) {
-                expect(err.message).toMatch(/missing or invalid required input/);
-            }
+            expect(err).toBeDefined();
+            expect(err.message).toMatch(/missing required input/);
+            done();
+        });
+    });
+
+    it('missing api file', function (done) {
+        var base = testutil.makeBase('spec');
+
+        base.args = ['foo'];
+        base.prompt.apiPath = path.join(__dirname, 'fixtures/abcxyz.json');
+
+        testutil.runGen(base, function (err) {
+            expect(err).toBeDefined();
+            expect(err.message).toMatch(/invalid required input/);
             done();
         });
     });
